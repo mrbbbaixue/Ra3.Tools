@@ -14,6 +14,11 @@ namespace RA3.Tools
         public string GamePath;
         public string LaunchParamter;
         public bool UseBarLauncher;
+        //
+        public ResourceFolder ModFolder     = new ResourceFolder(System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Red Alert 3\\Mods\\");
+        public ResourceFolder ReplayFolder  = new ResourceFolder(System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Red Alert 3\\Replays\\");
+        public ResourceFolder MapFolder     = new ResourceFolder(Environment.GetEnvironmentVariable("appdata") + "\\Red Alert 3\\Maps\\");
+        public ResourceFolder ProfileFolder = new ResourceFolder(Environment.GetEnvironmentVariable("appdata") + "\\Red Alert 3\\Profiles\\");
         /// <summary>  
         /// 红警3进程实例
         /// </summary>  
@@ -53,6 +58,7 @@ namespace RA3.Tools
 
         public bool IsRA3FileValid()
         {
+
             return false;
         }
 
@@ -71,19 +77,22 @@ namespace RA3.Tools
             catch (Exception) { }
         }
 
-        public void OpenRA3ModFolder()
+        public void Launch()
         {
-            
+            var LauncherPath = GamePath + "RA3.exe";
+            if (UseBarLauncher == true)
+            {
+                LauncherPath = "RA3BarLauncher.exe";
+            }
+            //
+            var ra3ProcessInfo = new ProcessStartInfo
+            {
+                FileName = LauncherPath,
+                Arguments = LaunchParamter,
+                WorkingDirectory = GamePath
+            };
+            Process.Start(ra3ProcessInfo);
         }
-        public void OpenRA3MapFolder()
-        {
-
-        }
-        public void OpenRA3ReplayFolder()
-        {
-
-        }
-
 
         //From @BSG-75 (https://github.com/BSG-75)
         public bool DoesRA3NeedSteamAppID()
@@ -106,7 +115,7 @@ namespace RA3.Tools
                 return false;
             }
 
-            return !File.ReadAllBytes(tucParPath).SequenceEqual(_patchedParFile);
+            return !File.ReadAllBytes(tucParPath).SequenceEqual(Utilities.PatchedParFile);
         }
 
         public void GenerateSteamAppID()
@@ -124,31 +133,21 @@ namespace RA3.Tools
                 ++oldFileId;
             }
             File.Move(tucParPath, $"{tucParPath}.{oldFileId}.old");
-            File.WriteAllBytes(tucParPath, _patchedParFile);
+            File.WriteAllBytes(tucParPath, Utilities.PatchedParFile);
+        }
+        //
+        public void TestLaunchFolder()
+        {
+            MapFolder.OpenInExplorer();
+            //在外部调用，应当是 RA3.MapFolder.OpenInExplorer();
         }
 
-        private static readonly byte[] _patchedParFile = new byte[]
-        {
-            0x13, 0x60, 0xC4, 0x41, 0x2A, 0x02, 0x11, 0x3C, 0x56, 0x32, 0x29, 0x76, 0x05, 0x20, 0x35, 0x53,
-            0x4A, 0x07, 0x23, 0x34, 0x13, 0x4C, 0x57, 0x54, 0x01, 0x41, 0x71, 0x49, 0x77, 0x05, 0x65, 0x73,
-            0x47, 0x05, 0x2A, 0x34, 0x55, 0x50, 0x27, 0x03, 0x24, 0x5F, 0x14, 0x57, 0x58, 0x11, 0x53, 0x03,
-            0x1F, 0x22, 0x5E, 0x0E, 0x4D, 0x51, 0x4A, 0x2F, 0x2F, 0x52, 0x04, 0x30, 0x05, 0x3E, 0x42, 0x04,
-            0x12, 0x17, 0x11, 0x23, 0x25, 0x14, 0x6F, 0x72, 0x03, 0x46, 0x47, 0x1E, 0x6E, 0x72, 0x14, 0x2E,
-            0x3A, 0x04, 0x23, 0x47, 0x10, 0x1B, 0x09, 0x54, 0x15, 0x04, 0x19, 0x3C, 0x47, 0x1D, 0x4C, 0x15,
-            0x57, 0x6E, 0x00, 0x55, 0x47, 0x16, 0x19, 0x23, 0x77, 0x18, 0x10, 0x0C, 0x45, 0x10, 0x2C, 0x26,
-            0x7C, 0x39, 0x3C, 0x56, 0x45, 0x1A, 0x21, 0x33, 0x42, 0x41, 0x17, 0x2E, 0x39, 0x40, 0x05, 0x05,
-            0x0A, 0x42, 0x51, 0x7D, 0x50, 0x0E, 0x50, 0x0C, 0x46, 0x46, 0x19, 0x0A, 0x28, 0x51, 0x4D, 0x07,
-            0x0B, 0x3C, 0x65, 0x42, 0x7D
-        };
-        //
-        
-
         //ToDo:1.完善检测文件完整的函数
-        //ToDo:3.添加打开地图/Mod文件夹的函数
         //ToDo:5.启动红警3并且注入dll的函数？
-        //ToDo:6.启动红警3的函数
-        //ToDo:7.读取Ratotal全局配置，并且保存RA3Settings
-        //ToDo:8.软链接修改Mod,Map,Replay的位置
+        //ToDo:7.读取Ratotal全局配置，并且保存RA3Settings（应当来自RA3.RatotalWebApi工具类）
+        //ToDo:8.软链接修改Mod,Map,Replay的位置（在ResourceFolder类中）
+        //ToDo:11.检查各个文件夹的大小（在ResourceFolder类中）
         //ToDo:9.读取本机用的所有马甲名称，尝试读取当前正在使用的？
+        //ToDo:10.读取并且修改红警3的所有设置（对于用户/global）
     }
 }
