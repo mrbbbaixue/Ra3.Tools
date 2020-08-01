@@ -55,7 +55,7 @@ namespace RA3.Tools
 
     public class ResourceFolder
     {
-        private readonly string Path;
+        public readonly string Path;
         public ResourceFolder(string path)
         {
             Path = path;
@@ -80,7 +80,14 @@ namespace RA3.Tools
         }
         public void Create()
         {
-
+            Directory.CreateDirectory(Path);
         }
+
+        public string Size()
+        {
+            try { return "incomplete";  }
+            catch (Exception) { return "err"; }
+        }
+        //If (!RA3.MapFolder.IsExist) {RA3.MapFolder.Create();}
     }
 }
