@@ -70,7 +70,7 @@ namespace RA3.Tools
             Process.Start(explorerProcessInfo);
         }
         //添加mklink函数？
-        public bool IsExist()
+        public bool Exists()
         {
             if (Directory.Exists(Path))
             {
@@ -86,7 +86,7 @@ namespace RA3.Tools
         public string Size()
         {
             try { return "incomplete";  }
-            catch (Exception) { return "err"; }
+            catch (Exception) { return "error"; }
         }
         //If (!RA3.MapFolder.IsExist) {RA3.MapFolder.Create();}
     }
