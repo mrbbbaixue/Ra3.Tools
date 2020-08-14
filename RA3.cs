@@ -6,7 +6,7 @@ using Microsoft.Win32;
 
 namespace RA3.Tools
 {
-    public class RA3Instance
+    public class RA3
         {
             public string GamePath;
             public string LaunchParamter;
@@ -20,7 +20,7 @@ namespace RA3.Tools
             /// 红警3进程实例
             /// </summary>  
             /// <param name="gamePath">游戏路径（可选，为空则从注册表读取）</param>  
-            public RA3Instance(string gamePath)
+            public RA3(string gamePath)
             {
                 //Read GamePath
                 if (string.IsNullOrWhiteSpace(gamePath))
