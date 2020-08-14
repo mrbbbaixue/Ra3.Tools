@@ -8,35 +8,30 @@ using System.Threading.Tasks;
 
 namespace RA3.Tools
 {
-    class Utilities
+    class Utility
     {
-         /// <summary>
-         /// 获取文件MD5值
-         /// </summary>
-         /// <param name="fileName">文件绝对路径</param>
-         /// <returns>MD5值</returns>
-         public static string GetMD5HashFromFile(string fileName)
+        public static string GetMD5HashFromFile(string fileName)
         {
-             try
-             {
-                 FileStream file = new FileStream(fileName, FileMode.Open);
-                 System.Security.Cryptography.MD5 md5 = new System.Security.Cryptography.MD5CryptoServiceProvider();
-                 byte[] retVal = md5.ComputeHash(file);
-                 file.Close();
- 
+            try
+            {
+                FileStream file = new FileStream(fileName, FileMode.Open);
+                System.Security.Cryptography.MD5 md5 = new System.Security.Cryptography.MD5CryptoServiceProvider();
+                byte[] retVal = md5.ComputeHash(file);
+                file.Close();
+
                 StringBuilder sb = new StringBuilder();
-                 for (int i = 0; i<retVal.Length; i++)
-                 {
-                     sb.Append(retVal[i].ToString("x2"));
-                 }
-                 return sb.ToString();
-             }
-             catch (Exception ex)
-             {
-                 throw new Exception("GetMD5HashFromFile() fail,error:" + ex.Message);
-             }
-         }
-        //please use Async
+                for (int i = 0; i < retVal.Length; i++)
+                {
+                    sb.Append(retVal[i].ToString("x2"));
+                }
+                return sb.ToString();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("GetMD5HashFromFile() fail,error:" + ex.Message);
+            }
+        }
+        //use Async
 
         public static readonly byte[] PatchedParFile = new byte[]
         {
@@ -69,8 +64,9 @@ namespace RA3.Tools
             };
             Process.Start(explorerProcessInfo);
         }
+
         //添加mklink函数？
-        public bool Exists()
+        public bool sExists()
         {
             if (Directory.Exists(Path))
             {
@@ -78,6 +74,7 @@ namespace RA3.Tools
             }
             return false;
         }
+
         public void Create()
         {
             Directory.CreateDirectory(Path);
@@ -85,9 +82,10 @@ namespace RA3.Tools
 
         public string Size()
         {
-            try { return "incomplete";  }
+            try { return "incomplete"; }
             catch (Exception) { return "error"; }
         }
         //If (!RA3.MapFolder.IsExist) {RA3.MapFolder.Create();}
     }
 }
+
