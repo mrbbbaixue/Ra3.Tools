@@ -5,11 +5,21 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Win32;
 
 namespace RA3.Tools
 {
     class Utility
     {
+        public static string GetGamePathFromRegistry()
+        {
+            using (var view32 = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32))
+            using (var ra3 = view32.OpenSubKey("Software\\Electronic Arts\\Electronic Arts\\Red Alert 3"))
+            {
+                return (string)ra3.GetValue("Install Dir");
+            }
+        }
+                            
         public static string GetMD5HashFromFile(string fileName)
         {
             try
@@ -66,7 +76,7 @@ namespace RA3.Tools
         }
 
         //添加mklink函数？
-        public bool sExists()
+        public bool Exists()
         {
             if (Directory.Exists(Path))
             {

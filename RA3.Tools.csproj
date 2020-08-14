@@ -11,6 +11,7 @@
     <PackageProjectUrl>https://github.com/MrBBBaiXue/RA3.Tools</PackageProjectUrl>
     <PackageIcon>RA3.Tools.png</PackageIcon>
     <RepositoryUrl>https://github.com/MrBBBaiXue/RA3.Tools</RepositoryUrl>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
