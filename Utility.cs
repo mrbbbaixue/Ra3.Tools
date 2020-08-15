@@ -9,7 +9,7 @@ using Microsoft.Win32;
 
 namespace RA3.Tools
 {
-    class Utility
+    public static class Utility
     {
         public static string GetGamePathFromRegistry()
         {
@@ -19,28 +19,7 @@ namespace RA3.Tools
                 return (string)ra3.GetValue("Install Dir");
             }
         }
-                            
-        public static string GetMD5HashFromFile(string fileName)
-        {
-            try
-            {
-                FileStream file = new FileStream(fileName, FileMode.Open);
-                System.Security.Cryptography.MD5 md5 = new System.Security.Cryptography.MD5CryptoServiceProvider();
-                byte[] retVal = md5.ComputeHash(file);
-                file.Close();
 
-                StringBuilder sb = new StringBuilder();
-                for (int i = 0; i < retVal.Length; i++)
-                {
-                    sb.Append(retVal[i].ToString("x2"));
-                }
-                return sb.ToString();
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("GetMD5HashFromFile() fail,error:" + ex.Message);
-            }
-        }
         //use Async
 
         public static readonly byte[] PatchedParFile = new byte[]

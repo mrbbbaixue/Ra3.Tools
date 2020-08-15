@@ -12,10 +12,12 @@
     <PackageIcon>RA3.Tools.png</PackageIcon>
     <RepositoryUrl>https://github.com/MrBBBaiXue/RA3.Tools</RepositoryUrl>
     <Version>1.0.1</Version>
+    <UserSecretsId>f29ab2a9-2d0a-4cd5-a893-d56121d4060a</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Win32.Registry" Version="4.7.0" />
+    <PackageReference Include="System.Diagnostics.Tools" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup>
