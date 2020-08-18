@@ -19,8 +19,56 @@ namespace RA3.Tools
                 return (string)ra3.GetValue("Install Dir");
             }
         }
+        //From CSDN. (From https://github.com/MrBBBaiXue/CoronaLauncher/)
+        private static long GetDirectoryLength(string directoryPath)
+        {
+            if (!Directory.Exists(directoryPath))
+                return 0;
+            long len = 0;
 
-        //use Async
+            DirectoryInfo di = new DirectoryInfo(directoryPath);
+
+            foreach (FileInfo fi in di.GetFiles())
+            {
+                len += fi.Length;
+            }
+            DirectoryInfo[] dis = di.GetDirectories();
+            if (dis.Length > 0)
+            {
+                for (int i = 0; i < dis.Length; i++)
+                {
+                    len += GetDirectoryLength(dis[i].FullName);
+                }
+            }
+            return len;
+        }
+        internal static string GetDirectorySize(string directoryPath)
+        {
+            var len = GetDirectoryLength(directoryPath);
+            if (len > 0)
+            {
+                double sizeKB = len / 1024;
+                if (sizeKB < 1024)
+                {
+                    return $"{Math.Round(sizeKB, 2)}KB";
+                }
+                else
+                {
+                    double sizeMB = sizeKB / 1024;
+                    if (sizeMB < 1024)
+                    {
+                        return $"{Math.Round(sizeMB, 2)}MB";
+                    }
+                    else
+                    {
+                        double sizeGB = sizeMB / 1024;
+                        return $"{Math.Round(sizeGB, 2)}GB";
+                    }
+                }
+            }
+            return "0B";
+        }
+
 
         public static readonly byte[] PatchedParFile = new byte[]
         {
@@ -43,6 +91,10 @@ namespace RA3.Tools
         public ResourceFolder(string path)
         {
             Path = path;
+            if (!Exists())
+            {
+                Create();
+            }
         }
         public void OpenInExplorer()
         {
@@ -53,9 +105,14 @@ namespace RA3.Tools
             };
             Process.Start(explorerProcessInfo);
         }
+        public string GetSize()
+        {
+            try { return Utility.GetDirectorySize(Path); }
+            catch (Exception) { return "ERROR"; }
+        }
 
         //添加mklink函数？
-        public bool Exists()
+        private bool Exists()
         {
             if (Directory.Exists(Path))
             {
@@ -63,16 +120,9 @@ namespace RA3.Tools
             }
             return false;
         }
-
-        public void Create()
+        private void Create()
         {
             Directory.CreateDirectory(Path);
-        }
-
-        public string Size()
-        {
-            try { return "incomplete"; }
-            catch (Exception) { return "error"; }
         }
         //If (!RA3.MapFolder.IsExist) {RA3.MapFolder.Create();}
     }
