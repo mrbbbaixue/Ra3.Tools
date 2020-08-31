@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Win32;
@@ -69,7 +70,6 @@ namespace RA3.Tools
             return "0B";
         }
 
-
         public static readonly byte[] PatchedParFile = new byte[]
         {
             0x13, 0x60, 0xC4, 0x41, 0x2A, 0x02, 0x11, 0x3C, 0x56, 0x32, 0x29, 0x76, 0x05, 0x20, 0x35, 0x53,
@@ -84,7 +84,6 @@ namespace RA3.Tools
             0x0B, 0x3C, 0x65, 0x42, 0x7D
         };
     }
-
     public class ResourceFolder
     {
         public readonly string Path;
@@ -114,11 +113,7 @@ namespace RA3.Tools
         //添加mklink函数？
         private bool Exists()
         {
-            if (Directory.Exists(Path))
-            {
-                return true;
-            }
-            return false;
+            return Directory.Exists(Path);
         }
         private void Create()
         {
@@ -126,5 +121,70 @@ namespace RA3.Tools
         }
         //If (!RA3.MapFolder.IsExist) {RA3.MapFolder.Create();}
     }
+
+    public class Skudef
+    {
+        public string Path;
+
+        public bool UseUniversalHeader = true;
+        const string UniversalHeader = "mod-game 1.12";
+
+        public string BigFileSearchPath;
+        private string _commandSearchBigFile => string.IsNullOrEmpty(BigFileSearchPath) ? $"set-search-path big:;\"{BigFileSearchPath}\";" : "." ;
+        private List<string> _addedBigs;
+
+        public Skudef(string skudefPath)
+        {
+            Path = skudefPath;
+            UseUniversalHeader = true;
+            if (File.Exists(Path))
+            {
+                TryRead();
+            }
+        }
+
+        public void Write()
+        {
+            var output = new List<string> { };
+            if (UseUniversalHeader)
+            {
+                output.Add(UniversalHeader);
+            }
+            if (!string.IsNullOrEmpty(BigFileSearchPath))
+            {
+                output.Add(_commandSearchBigFile);
+            }
+            foreach (var bigFile in _addedBigs)
+            {
+                output.Add($"add-big \"{bigFile}\"");
+            }
+            File.WriteAllLines(Path,output);
+        }
+
+        public void RemoveBig(string bigPath)
+        {
+            _addedBigs.Remove($"\"{bigPath}\"");
+        }
+        public void AddBig(string bigPath)
+        {
+            _addedBigs.Add($"\"{bigPath}\"");
+        }
+
+        //private methods.
+        private void TryRead()
+        {
+            string[] skudefCommands = File.ReadAllLines(Path);
+            foreach (string skudefCommand in skudefCommands)
+            {
+                if (skudefCommand.Contains("add-big "))
+                {
+                    _addedBigs.Add(skudefCommand.Replace("add-big ", "").Replace("\"",""));
+                }
+            }
+            return;
+        }
+
+    }
+
 }
 
