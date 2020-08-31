@@ -11,10 +11,10 @@
     <PackageProjectUrl>https://github.com/MrBBBaiXue/RA3.Tools</PackageProjectUrl>
     <PackageIcon>RA3.Tools.png</PackageIcon>
     <RepositoryUrl>https://github.com/MrBBBaiXue/RA3.Tools</RepositoryUrl>
-    <Version>1.0.4</Version>
+    <Version>1.0.5</Version>
     <UserSecretsId>f29ab2a9-2d0a-4cd5-a893-d56121d4060a</UserSecretsId>
-    <AssemblyVersion>1.0.4.0</AssemblyVersion>
-    <FileVersion>1.0.4.0</FileVersion>
+    <AssemblyVersion>1.0.5.0</AssemblyVersion>
+    <FileVersion>1.0.5.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
