@@ -125,10 +125,7 @@ namespace RA3.Tools
     public class Skudef
     {
         public string Path;
-
-        public bool UseUniversalHeader = true;
         const string UniversalHeader = "mod-game 1.12";
-
         public string BigFileSearchPath;
         private string _commandSearchBigFile => string.IsNullOrEmpty(BigFileSearchPath) ? $"set-search-path big:;\"{BigFileSearchPath}\";" : "." ;
         private List<string> _addedBigs;
@@ -136,20 +133,20 @@ namespace RA3.Tools
         public Skudef(string skudefPath)
         {
             Path = skudefPath;
-            UseUniversalHeader = true;
             if (File.Exists(Path))
             {
-                TryRead();
+                _addedBigs = TryRead();
+            }
+            else
+            {
+                _addedBigs = new List<string> { };
             }
         }
 
         public void Write()
         {
             var output = new List<string> { };
-            if (UseUniversalHeader)
-            {
-                output.Add(UniversalHeader);
-            }
+            output.Add(UniversalHeader);
             if (!string.IsNullOrEmpty(BigFileSearchPath))
             {
                 output.Add(_commandSearchBigFile);
@@ -163,25 +160,28 @@ namespace RA3.Tools
 
         public void RemoveBig(string bigPath)
         {
-            _addedBigs.Remove($"\"{bigPath}\"");
+            _addedBigs.Remove(bigPath);
         }
         public void AddBig(string bigPath)
         {
-            _addedBigs.Add($"\"{bigPath}\"");
+            _addedBigs.Add(bigPath);
         }
 
         //private methods.
-        private void TryRead()
+        private List<string> TryRead()
         {
             string[] skudefCommands = File.ReadAllLines(Path);
+            var list = new List<string> { };
             foreach (string skudefCommand in skudefCommands)
             {
                 if (skudefCommand.Contains("add-big "))
                 {
-                    _addedBigs.Add(skudefCommand.Replace("add-big ", "").Replace("\"",""));
+
+                    list.Add(skudefCommand.Replace("add-big ", "").Replace("\"",""));
                 }
             }
-            return;
+
+            return list;
         }
 
     }
