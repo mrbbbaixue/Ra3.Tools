@@ -153,7 +153,7 @@ namespace RA3.Tools
             }
             foreach (var bigFile in _addedBigs)
             {
-                output.Add($"add-big \"{bigFile}\"");
+                output.Add($"add-big {bigFile}");
             }
             File.WriteAllLines(Path,output);
         }
