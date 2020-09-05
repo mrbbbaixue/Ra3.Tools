@@ -30,11 +30,7 @@ namespace RA3.Tools
             //Read GamePath
             if (string.IsNullOrWhiteSpace(gamePath))
             {
-                using (var view32 = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32))
-                using (var ra3 = view32.OpenSubKey("Software\\Electronic Arts\\Electronic Arts\\Red Alert 3"))
-                {
-                    GamePath = (string)ra3.GetValue("Install Dir");
-                }
+                GamePath = Utility.GetGamePathFromRegistry();
             }
             else
             {
@@ -42,7 +38,7 @@ namespace RA3.Tools
                 GamePath = gamePath;
             }
             //Check BarLauncher
-            if (File.Exists("RA3BarLauncher.exe"))
+            if (File.Exists(".\\RA3BarLauncher.exe"))
             {
                 UseBarLauncher = true;
             }
@@ -88,7 +84,7 @@ namespace RA3.Tools
             var LauncherPath = Path.Combine(GamePath, "RA3.exe");
             if ((UseBarLauncher == true) && File.Exists("RA3BarLauncher.exe"))
             {
-                LauncherPath = "RA3BarLauncher.exe";
+                LauncherPath = Path.Combine(Directory.GetCurrentDirectory(), "RA3BarLauncher.exe");
             }
 
             var ra3ProcessInfo = new ProcessStartInfo

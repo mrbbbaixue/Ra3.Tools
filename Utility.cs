@@ -14,11 +14,19 @@ namespace RA3.Tools
     {
         public static string GetGamePathFromRegistry()
         {
-            using (var view32 = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32))
-            using (var ra3 = view32.OpenSubKey("Software\\Electronic Arts\\Electronic Arts\\Red Alert 3"))
+            try 
             {
-                return (string)ra3.GetValue("Install Dir");
+                using (var view32 = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32))
+                using (var ra3 = view32.OpenSubKey("Software\\Electronic Arts\\Electronic Arts\\Red Alert 3"))
+                {
+                    return (string)ra3.GetValue("Install Dir");
+                }
+            } 
+            catch
+            {
+                return string.Empty;
             }
+
         }
         //From CSDN. (From https://github.com/MrBBBaiXue/CoronaLauncher/)
         private static long GetDirectoryLength(string directoryPath)
