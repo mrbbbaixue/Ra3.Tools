@@ -135,7 +135,7 @@ namespace RA3.Tools
         public string Path;
         const string UniversalHeader = "mod-game 1.12";
         public string BigFileSearchPath;
-        private string _commandSearchBigFile => string.IsNullOrEmpty(BigFileSearchPath) ? $"set-search-path big:;\"{BigFileSearchPath}\";" : "." ;
+        private string _commandSearchBigFile => string.IsNullOrEmpty(BigFileSearchPath) ? $"set-search-path big:;\"{BigFileSearchPath}\";" : "set-search-path big:;.;";
         private List<string> _addedBigs;
 
         public Skudef(string skudefPath)
