@@ -12,6 +12,8 @@ namespace RA3.Tools
 {
     public class RA3Instance
     {
+        private static readonly string _quickLoaderPath = "RA3.QuickLoader.exe";
+        //
         public string GamePath;
         public string LaunchParamter;
         public bool UseBarLauncher;
@@ -34,11 +36,10 @@ namespace RA3.Tools
             }
             else
             {
-
                 GamePath = gamePath;
             }
-            //Check BarLauncher
-            if (File.Exists(".\\RA3BarLauncher.exe"))
+            //Check RA3.QuickLoader
+            if (File.Exists($".\\{_quickLoaderPath}"))
             {
                 UseBarLauncher = true;
             }
@@ -66,6 +67,7 @@ namespace RA3.Tools
         #region Launch & Register
         public void Register()
         {
+            //ToDo : 需要直接写入，而不是依赖RA3.reg
             try
             {
                 if (File.Exists("RA3.reg"))
@@ -82,9 +84,9 @@ namespace RA3.Tools
         public void Launch()
         {
             var LauncherPath = Path.Combine(GamePath, "RA3.exe");
-            if ((UseBarLauncher == true) && File.Exists("RA3BarLauncher.exe"))
+            if ((UseBarLauncher == true) && File.Exists(_quickLoaderPath))
             {
-                LauncherPath = Path.Combine(Directory.GetCurrentDirectory(), "RA3BarLauncher.exe");
+                LauncherPath = Path.Combine(Directory.GetCurrentDirectory(), _quickLoaderPath);
             }
 
             var ra3ProcessInfo = new ProcessStartInfo
@@ -112,6 +114,7 @@ namespace RA3.Tools
             return !File.Exists(steamAppIDPath) || File.ReadAllText(steamAppIDPath).Trim() != "17480";
         }
 
+        //Abandoned
         public bool DoesRA3NeedPatchedParFile()
         {
             var tucParPath = Path.Combine(GamePath, "Data", "ra3_1.12.par");
@@ -129,6 +132,7 @@ namespace RA3.Tools
             File.WriteAllText(steamAppIDPath, "17480");
         }
 
+        //Abandoned
         public void GeneratePatchedParFile()
         {
             var tucParPath = Path.Combine(GamePath, "Data", "ra3_1.12.par");
@@ -144,7 +148,6 @@ namespace RA3.Tools
         #endregion
 
         #region Profile Operations
-
         private List<string> GetProfilesList()
         {
             string[] directories = Directory.GetDirectories(ProfileFolder.Path);
@@ -155,31 +158,13 @@ namespace RA3.Tools
             }
             return profiles;
         }
-        public void DeleteSkirmishIni(List<string> profiles)
-        {
-            try
-            {
-                foreach (string profile in profiles)
-                {
-                    File.Delete($"{ProfileFolder.Path}\\{profile}\\Skirmish.ini");
-                }
-            }
-            catch { }
-        }
-        public void DeleteSkirmishIni()
-        {
-            try
-            {
-                File.Delete($"{ProfileFolder.Path}\\{GetCurrentProfile()}\\Skirmish.ini");
-            }
-            catch { }
-        }
-        public string GetCurrentProfile()
+        public string GetCurrentProfile(List<string> profiles)
         {
             string[] allLines = File.ReadAllLines($"{ProfileFolder.Path}\\directory.ini");
             string rawCurrentProfile = "ERROR!";
             foreach (string line in allLines)
             {
+                //UTF-16
                 if (line.Contains("C_00u_00r_00r_00e_00n_00t_00P_00r_00o_00f_00i_00l_00e_00_3D_00"))
                 {
                     rawCurrentProfile = line;
@@ -194,11 +179,17 @@ namespace RA3.Tools
             rawCurrentProfile = rawCurrentProfile.Substring(62).Replace("_00","");
             return rawCurrentProfile;
         }
-
+        public void DeleteSkirmishINI(string profile)
+        {
+            try
+            {
+                File.Delete($"{ProfileFolder.Path}\\{profile}\\Skirmish.ini");
+            }
+            catch { }
+        }
         #endregion
 
         //ToDo:1.完善检测文件完整的函数
         //ToDo:8.软链接修改Mod,Map,Replay的位置（在ResourceFolder类中）
-        //ToDo:9.读取本机用的所有马甲名称，尝试读取当前正在使用的？
     }
 }

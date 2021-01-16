@@ -98,9 +98,16 @@ namespace RA3.Tools
         public ResourceFolder(string path)
         {
             Path = path;
-            if (!Exists())
+            if (!Directory.Exists(Path))
             {
-                Create();
+                try
+                {
+                    Directory.CreateDirectory(Path);
+                }
+                catch
+                {
+                    //Error handling
+                }
             }
         }
         public void OpenInExplorer()
@@ -119,15 +126,7 @@ namespace RA3.Tools
         }
 
         //添加mklink函数？
-        private bool Exists()
-        {
-            return Directory.Exists(Path);
-        }
-        private void Create()
-        {
-            Directory.CreateDirectory(Path);
-        }
-        //If (!RA3.MapFolder.IsExist) {RA3.MapFolder.Create();}
+
     }
 
     public class Skudef
@@ -151,7 +150,7 @@ namespace RA3.Tools
             }
         }
 
-        public void Write()
+        public void TryWrite()
         {
             var output = new List<string> { };
             output.Add(UniversalHeader);
