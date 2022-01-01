@@ -158,7 +158,8 @@ namespace RA3.Tools
             }
             return profiles;
         }
-        public string GetCurrentProfile(List<string> profiles)
+
+        public string GetCurrentProfile()
         {
             string[] allLines = File.ReadAllLines($"{ProfileFolder.Path}\\directory.ini");
             string rawCurrentProfile = "ERROR!";
@@ -179,6 +180,7 @@ namespace RA3.Tools
             rawCurrentProfile = rawCurrentProfile.Substring(62).Replace("_00","");
             return rawCurrentProfile;
         }
+
         public void DeleteSkirmishINI(string profile)
         {
             try
@@ -186,6 +188,14 @@ namespace RA3.Tools
                 File.Delete($"{ProfileFolder.Path}\\{profile}\\Skirmish.ini");
             }
             catch { }
+        }
+
+        public void DeleteAllSkirmishINI()
+        {
+            foreach (var i in GetProfilesList())
+            {
+                DeleteSkirmishINI(i);
+            }
         }
         #endregion
 
