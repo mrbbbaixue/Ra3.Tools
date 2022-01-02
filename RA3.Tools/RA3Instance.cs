@@ -33,7 +33,7 @@ namespace RA3.Tools
             //Read GamePath
             if (string.IsNullOrWhiteSpace(gamePath))
             {
-                GamePath = Utility.GetGamePathFromRegistry();
+                GamePath = Registry.GetRA3Path();
             }
             else
             {
