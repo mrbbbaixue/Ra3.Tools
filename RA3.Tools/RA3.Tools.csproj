@@ -6,7 +6,7 @@
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <Authors>MrBBBaiXue</Authors>
     <Company>MrBBBaiXue</Company>
-    <Description>A useful client for Red Alert 3.</Description>
+    <Description>A useful library of Command and Conquer : Red Alert 3.</Description>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/MrBBBaiXue/RA3.Tools</PackageProjectUrl>
     <PackageIcon>RA3.Tools.png</PackageIcon>
