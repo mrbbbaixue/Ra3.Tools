@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Security.Principal;
-using Microsoft.Win32;
+using System.Text;
 
 namespace RA3.Tools
 {
@@ -17,7 +15,10 @@ namespace RA3.Tools
         public string GamePath;
         public string LaunchParamter;
         public bool UseBarLauncher;
-        public List<string> Profiles;
+        public List<string> Profiles
+        {
+            get { return GetProfilesList(); } 
+        }
         //
         public readonly ResourceFolder ModFolder = new ResourceFolder(System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Red Alert 3\\Mods\\");
         public readonly ResourceFolder ReplayFolder = new ResourceFolder(System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Red Alert 3\\Replays\\");
@@ -32,7 +33,7 @@ namespace RA3.Tools
             //Read GamePath
             if (string.IsNullOrWhiteSpace(gamePath))
             {
-                GamePath = Utility.GetGamePathFromRegistry();
+                GamePath = Registry.GetRA3Path();
             }
             else
             {
@@ -43,8 +44,6 @@ namespace RA3.Tools
             {
                 UseBarLauncher = true;
             }
-            //Read Profiles
-            Profiles = GetProfilesList();
         }
 
         #region Check Files
@@ -148,37 +147,57 @@ namespace RA3.Tools
         #endregion
 
         #region Profile Operations
+        // Parse string encoded by EA similar to UTF-8 in directory.ini
+        private string ParseDirectoryString(string s)
+        {
+            var bytes = new List<byte>();
+            for (int i = 0; i < s.Length; i++)
+            {
+                var c = s[i];
+                if (c != '_')
+                {
+                    bytes.Add(Convert.ToByte(c));
+                }
+                else
+                {
+                    var hex = new char[] { s[i + 1], s[i + 2] };
+                    var n = int.Parse(hex, NumberStyles.HexNumber);
+                    bytes.Add(Convert.ToByte(n));
+                    i += 2;
+                }
+            }
+            return Encoding.Unicode.GetString(bytes.ToArray());
+        }
+
         private List<string> GetProfilesList()
         {
+            var original = ParseDirectoryString(File.ReadAllLines($"{ProfileFolder.Path}\\directory.ini")[0]);
             string[] directories = Directory.GetDirectories(ProfileFolder.Path);
             List<string> profiles = new List<string>();
             foreach (string profile in directories)
             {
-                profiles.Add(Path.GetFileNameWithoutExtension(profile));
+                // verify if the profile exist in directory.ini
+                if (original.Contains(Path.GetFileNameWithoutExtension(profile)))
+                {
+                    profiles.Add(Path.GetFileNameWithoutExtension(profile));
+                }
             }
             return profiles;
         }
-        public string GetCurrentProfile(List<string> profiles)
+
+        public string GetCurrentProfile()
         {
-            string[] allLines = File.ReadAllLines($"{ProfileFolder.Path}\\directory.ini");
-            string rawCurrentProfile = "ERROR!";
-            foreach (string line in allLines)
+            try
             {
-                //UTF-16
-                if (line.Contains("C_00u_00r_00r_00e_00n_00t_00P_00r_00o_00f_00i_00l_00e_00_3D_00"))
-                {
-                    rawCurrentProfile = line;
-                    break;
-                }
+                var original = File.ReadAllLines($"{ProfileFolder.Path}\\directory.ini")[1];
+                return ParseDirectoryString(original)[15..];
             }
-            //Operate with currentProfileLine.
-            if (rawCurrentProfile == "ERROR!")
+            catch
             {
-                return rawCurrentProfile;
+                return null;
             }
-            rawCurrentProfile = rawCurrentProfile.Substring(62).Replace("_00","");
-            return rawCurrentProfile;
         }
+
         public void DeleteSkirmishINI(string profile)
         {
             try
@@ -186,6 +205,14 @@ namespace RA3.Tools
                 File.Delete($"{ProfileFolder.Path}\\{profile}\\Skirmish.ini");
             }
             catch { }
+        }
+
+        public void DeleteAllSkirmishINI()
+        {
+            foreach (var i in Profiles)
+            {
+                DeleteSkirmishINI(i);
+            }
         }
         #endregion
 
