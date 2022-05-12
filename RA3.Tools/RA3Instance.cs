@@ -75,7 +75,7 @@ namespace RA3.Tools
                 throw new ArgumentException("缺少游戏可执行文件", nameof(gameExecutable));
             if (!File.Exists(skudef))
                 throw new ArgumentException("找不到skudef");
-            var si = new ProcessStartInfo(gameExecutable, $"-skudef {skudef}");
+            var si = new ProcessStartInfo(gameExecutable, $"-config {skudef}");
             Process.Start(si);
 		}
 
