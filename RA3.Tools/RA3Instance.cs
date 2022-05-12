@@ -64,6 +64,21 @@ namespace RA3.Tools
         #endregion
 
         #region Launch & Register
+        /// <summary>
+        /// 用skudef直接启动游戏
+        /// </summary>
+        /// <param name="gameExecutable">比如ra3_1.12.game</param>
+        /// <param name="skudef">又比如RA3_chinese_s_1.12.SkuDef</param>
+        private static void LaunchGameSkudef(string gameExecutable, string skudef)
+		{
+            if (!File.Exists(gameExecutable))
+                throw new ArgumentException("缺少游戏可执行文件", nameof(gameExecutable));
+            if (!File.Exists(skudef))
+                throw new ArgumentException("找不到skudef");
+            var si = new ProcessStartInfo(gameExecutable, $"-skudef {skudef}");
+            Process.Start(si);
+		}
+
         public void Register()
         {
             //ToDo : 需要直接写入，而不是依赖RA3.reg
