@@ -66,18 +66,11 @@ namespace RA3.Tools
         #region Launch & Register
         public void Register()
         {
-            //ToDo : 需要直接写入，而不是依赖RA3.reg
-            try
+            if (IsRA3PathValid() && IsRA3FileValid() && Registry.Status != Registry.RegistryStatus.Correct)
             {
-                if (File.Exists("RA3.reg"))
-                {
-                    string regPath = Path.GetFullPath("RA3.reg");
-                    regPath = @"""" + regPath + @"""";
-                    Process.Start("regedit", string.Format(" /s {0}", regPath));
-                }
-                //write registion here.
+                Registry.SetRA3Path(GamePath);
+                Registry.EnableMapSync();
             }
-            catch (Exception) { }
         }
 
         public void Launch()
@@ -100,7 +93,7 @@ namespace RA3.Tools
         #endregion
 
         #region Steam & Origin Version detection.
-        //From @BSG-75 (https://github.com/BSG-75)
+        //From @lanyizi (https://github.com/lanyizi)
         public bool DoesRA3NeedSteamAppID()
         {
             var ra3Path = GamePath;
@@ -132,7 +125,7 @@ namespace RA3.Tools
         }
 
         //Abandoned
-        public void GeneratePatchedParFile()
+        public void _GeneratePatchedParFile()
         {
             var tucParPath = Path.Combine(GamePath, "Data", "ra3_1.12.par");
             var oldFileId = 0;
@@ -216,7 +209,7 @@ namespace RA3.Tools
         }
         #endregion
 
-        //ToDo:1.完善检测文件完整的函数
-        //ToDo:8.软链接修改Mod,Map,Replay的位置（在ResourceFolder类中）
+        //ToDo: 1.完善检测文件完整的函数
+        //ToDo: 8.软链接修改Mod,Map,Replay的位置（在ResourceFolder类中）
     }
 }

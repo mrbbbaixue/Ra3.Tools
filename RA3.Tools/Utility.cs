@@ -105,6 +105,7 @@ namespace RA3.Tools
         }
         public string GetSize()
         {
+            // TODO: Don't return "ERROR" only!
             try { return Utility.GetDirectorySize(Path); }
             catch (Exception) { return "ERROR"; }
         }
