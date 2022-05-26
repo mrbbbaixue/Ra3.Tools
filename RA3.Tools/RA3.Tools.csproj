@@ -11,16 +11,16 @@
     <PackageProjectUrl>https://github.com/MrBBBaiXue/RA3.Tools</PackageProjectUrl>
     <PackageIcon>RA3.Tools.png</PackageIcon>
     <RepositoryUrl>https://github.com/MrBBBaiXue/RA3.Tools</RepositoryUrl>
-    <Version>1.0.9</Version>
+    <Version>1.1.0</Version>
     <UserSecretsId>f29ab2a9-2d0a-4cd5-a893-d56121d4060a</UserSecretsId>
-    <AssemblyVersion>1.0.9.0</AssemblyVersion>
-    <FileVersion>1.0.9.0</FileVersion>
+    <AssemblyVersion>1.1.0.0</AssemblyVersion>
+    <FileVersion>1.1.0.0</FileVersion>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>game; red-alert-3;</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Win32.Registry" Version="4.7.0" />
+    <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
     <PackageReference Include="System.Diagnostics.Tools" Version="4.3.0" />
   </ItemGroup>
 
