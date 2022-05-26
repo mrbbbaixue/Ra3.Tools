@@ -12,7 +12,7 @@ namespace RA3.Tools
 {
     public static class Utility
     {
-        //From CSDN. (From https://github.com/MrBBBaiXue/CoronaLauncher/)
+        // From https://github.com/RA3CoronaDevelopers/CoronaLauncher/
         private static long GetDirectoryLength(string directoryPath)
         {
             if (!Directory.Exists(directoryPath))
@@ -158,7 +158,7 @@ namespace RA3.Tools
             _addedBigs.Add(bigPath);
         }
 
-        //private methods.
+        // Private methods.
         private List<string> TryRead()
         {
             string[] skudefCommands = File.ReadAllLines(Path);

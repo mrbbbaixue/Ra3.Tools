@@ -20,10 +20,10 @@ namespace RA3.Tools
             get { return GetProfilesList(); } 
         }
         //
-        public readonly ResourceFolder ModFolder = new ResourceFolder(System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Red Alert 3\\Mods\\");
-        public readonly ResourceFolder ReplayFolder = new ResourceFolder(System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Red Alert 3\\Replays\\");
-        public readonly ResourceFolder MapFolder = new ResourceFolder(Environment.GetEnvironmentVariable("appdata") + "\\Red Alert 3\\Maps\\");
-        public readonly ResourceFolder ProfileFolder = new ResourceFolder(Environment.GetEnvironmentVariable("appdata") + "\\Red Alert 3\\Profiles\\");
+        public readonly ResourceFolder ModFolder = new ResourceFolder(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Red Alert 3", "Mods"));
+        public readonly ResourceFolder ReplayFolder = new ResourceFolder(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Red Alert 3", "Replays"));
+        public readonly ResourceFolder MapFolder = new ResourceFolder(Path.Combine(Environment.GetEnvironmentVariable("appdata"), "Red Alert 3", "Maps"));
+        public readonly ResourceFolder ProfileFolder = new ResourceFolder(Path.Combine(Environment.GetEnvironmentVariable("appdata"), "Red Alert 3", "Profiles"));
         /// <summary>  
         /// 红警3进程实例
         /// </summary>  
