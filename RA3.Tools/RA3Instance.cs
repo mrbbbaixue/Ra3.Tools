@@ -51,7 +51,7 @@ namespace RA3.Tools
         {
             try
             {
-                return Directory.EnumerateFiles(GamePath, "RA3_*_1.12.SkuDef").Any();
+                return Directory.EnumerateFiles(GamePath, "*.skudef").Any();
             }
             catch (Exception) { }
             return false;
@@ -65,19 +65,20 @@ namespace RA3.Tools
 
         #region Launch & Register
         /// <summary>
-        /// 用skudef直接启动游戏
+        /// launch game using skudef file directly.
         /// </summary>
-        /// <param name="gameExecutable">比如ra3_1.12.game</param>
-        /// <param name="skudef">又比如RA3_chinese_s_1.12.SkuDef</param>
-        private static void LaunchGameSkudef(string gameExecutable, string skudef)
+        /// <param name="executablePath">e.g. ra3_1.12.game</param>
+        /// <param name="skudefPath">e.g. RA3_chinese_t_1.12.skudef</param>
+        public static void LaunchUsingSkudef(string executablePath, string skudefPath)
 		{
-            if (!File.Exists(gameExecutable))
-                throw new ArgumentException("缺少游戏可执行文件", nameof(gameExecutable));
-            if (!File.Exists(skudef))
-                throw new ArgumentException("找不到skudef");
-            var si = new ProcessStartInfo(gameExecutable, $"-config {skudef}");
-            Process.Start(si);
+            if (!File.Exists(executablePath))
+                throw new ArgumentException("Game not found.", nameof(executablePath));
+            if (!File.Exists(skudefPath))
+                throw new ArgumentException("Skudef not found.");
+            var startInfo = new ProcessStartInfo(executablePath, $"-config {skudefPath}");
+            Process.Start(startInfo);
 		}
+        // TODO: 与Launch合并
 
         public void Register()
         {
