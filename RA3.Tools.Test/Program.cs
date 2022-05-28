@@ -1,12 +1,23 @@
 ﻿using RA3.Tools;
+using Con = System.Console;
+
 
 var ra3 = new RA3Instance();
+
+Con.WriteLine("[Profiles]");
 foreach (var i in ra3.Profiles)
 {
-    Console.WriteLine(i);
+    Con.WriteLine(i);
 }
-Console.WriteLine(ra3.GetCurrentProfile());
+Con.WriteLine();
 
-Console.WriteLine("RA3 Path: " + RA3.Tools.Registry.GetRA3Path());
-Console.WriteLine("Registry Status: " + RA3.Tools.Registry.Status);
-Console.ReadKey();
+Con.WriteLine("[Current Profile]");
+Con.WriteLine(ra3.GetCurrentProfile());
+Con.WriteLine();
+
+Con.WriteLine("[RA3 Path] " + RA3.Tools.Registry.GetRA3Path());
+Con.WriteLine("[Registry Status] " + RA3.Tools.Registry.Status);
+
+RA3.Tools.Registry.SetLanguage(RA3.Tools.Registry.GetRA3Path(), "chinese_t");
+
+Con.ReadKey();

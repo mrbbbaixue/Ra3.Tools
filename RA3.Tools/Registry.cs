@@ -1,4 +1,5 @@
 ﻿using Microsoft.Win32;
+using System.IO;
 
 namespace RA3.Tools
 {
@@ -9,7 +10,8 @@ namespace RA3.Tools
             Correct,
             NotExist,
             MissingPath,
-            MissingMapSync
+            MissingMapSync,
+            MissingLanguage,
         }
 
         public static RegistryStatus Status
@@ -34,6 +36,13 @@ namespace RA3.Tools
             {
                 return RegistryStatus.MissingMapSync;
             }
+
+            using var viewUser = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Default);
+            using var languageRa3 = view32.OpenSubKey("Software\\Electronic Arts\\Electronic Arts\\Red Alert 3", writable: true);
+            if (languageRa3 == null || languageRa3.GetValue("Language") == null)
+            {
+                return RegistryStatus.MissingLanguage;
+            }
             return RegistryStatus.Correct;
         }
 
@@ -55,6 +64,37 @@ namespace RA3.Tools
                 return;
             }
             ra3.SetValue("Install Dir", path, RegistryValueKind.String);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="gamePath">Game install folder.</param>
+        /// <param name="value">Language string.</param>
+        /// <returns>true if succeed. false if failed (language not find in game folder).</returns>
+        public static bool SetLanguage(string gamePath, string value)
+        {
+            try
+            {
+                // verify if v1.12 skudef file of this value exists.
+                var isTargetSkudefExists = File.Exists(Path.Combine(gamePath, $"RA3_{value}_1.12.skudef"));
+                var isTargetCsfExists = File.Exists(Path.Combine(gamePath, "Launcher", $"{value}.csf"));
+                if (isTargetSkudefExists && isTargetCsfExists)
+                {
+                    using var view32 = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Default);
+                    using var ra3 = view32.OpenSubKey("Software\\Electronic Arts\\Electronic Arts\\Red Alert 3", writable: true);
+                    if (ra3 == null)
+                    {
+                        using var newRa3 = view32.CreateSubKey("Software\\Electronic Arts\\Electronic Arts\\Red Alert 3", writable: true);
+                        newRa3.SetValue("Language", value, RegistryValueKind.String);
+                        return true;
+                    }
+                    ra3.SetValue("Language", value, RegistryValueKind.String);
+                    return true;
+                }
+            }
+            catch { }            
+            return false;
         }
 
         public static void EnableMapSync()

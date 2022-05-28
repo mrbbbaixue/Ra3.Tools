@@ -10,24 +10,43 @@ namespace RA3.Tools
 {
     public class RA3Instance
     {
+        /// <summary>
+        /// Private pre-defined name of QuickLoader.
+        /// </summary>
+        /// TODO: Download to AppData automatically.
         private static readonly string _quickLoaderPath = "RA3.QuickLoader.exe";
-        //
+
+        /// <summary>
+        /// Game install folder.
+        /// </summary>
         public string GamePath;
+
+        /// <summary>
+        /// Parameter passes to game.
+        /// </summary>
         public string LaunchParamter;
+
+        /// <summary>
+        /// Whether to use RA3BarLauncher to launch game.
+        /// </summary>
         public bool UseBarLauncher;
+
+        /// <summary>
+        /// Avaliable profiles of game user.
+        /// </summary>
         public List<string> Profiles
         {
             get { return GetProfilesList(); } 
         }
-        //
         public readonly ResourceFolder ModFolder = new ResourceFolder(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Red Alert 3", "Mods"));
         public readonly ResourceFolder ReplayFolder = new ResourceFolder(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Red Alert 3", "Replays"));
         public readonly ResourceFolder MapFolder = new ResourceFolder(Path.Combine(Environment.GetEnvironmentVariable("appdata"), "Red Alert 3", "Maps"));
         public readonly ResourceFolder ProfileFolder = new ResourceFolder(Path.Combine(Environment.GetEnvironmentVariable("appdata"), "Red Alert 3", "Profiles"));
+        
         /// <summary>  
-        /// 红警3进程实例
+        /// Red-Alert 3 Game Instance.
         /// </summary>  
-        /// <param name="gamePath">游戏路径（可选，为空则从注册表读取）</param>  
+        /// <param name="gamePath">Game install folder. Will Read from Registry if empty.</param>  
         public RA3Instance(string gamePath = "")
         {
             //Read GamePath
@@ -39,8 +58,8 @@ namespace RA3.Tools
             {
                 GamePath = gamePath;
             }
-            //Check RA3.QuickLoader
-            if (File.Exists($".\\{_quickLoaderPath}"))
+            //Check if RA3.QuickLoader is avaliable.
+            if (File.Exists(Path.GetFullPath(_quickLoaderPath)))
             {
                 UseBarLauncher = true;
             }
@@ -59,7 +78,7 @@ namespace RA3.Tools
 
         public bool IsRA3FileValid()
         {
-            return false;
+            throw new NotImplementedException();
         }
         #endregion
 
@@ -82,7 +101,7 @@ namespace RA3.Tools
 
         public void Register()
         {
-            if (IsRA3PathValid() && IsRA3FileValid() && Registry.Status != Registry.RegistryStatus.Correct)
+            if (IsRA3PathValid() && Registry.Status != Registry.RegistryStatus.Correct)
             {
                 Registry.SetRA3Path(GamePath);
                 Registry.EnableMapSync();
@@ -156,7 +175,11 @@ namespace RA3.Tools
         #endregion
 
         #region Profile Operations
-        // Parse string encoded by EA similar to UTF-8 in directory.ini
+        /// <summary>
+        /// Parse string encoded by EA similar to UTF-8 in directory.ini
+        /// </summary>
+        /// <param name="s">string</param>
+        /// <returns></returns>
         private string ParseDirectoryString(string s)
         {
             var bytes = new List<byte>();
@@ -177,7 +200,10 @@ namespace RA3.Tools
             }
             return Encoding.Unicode.GetString(bytes.ToArray());
         }
-
+        /// <summary>
+        /// Get list of avaliable profiles list.
+        /// </summary>
+        /// <returns>List of avaliable game profiles.</returns>
         private List<string> GetProfilesList()
         {
             var original = ParseDirectoryString(File.ReadAllLines($"{ProfileFolder.Path}\\directory.ini")[0]);
