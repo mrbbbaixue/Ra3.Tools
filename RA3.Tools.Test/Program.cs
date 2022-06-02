@@ -18,6 +18,5 @@ Con.WriteLine();
 Con.WriteLine("[RA3 Path] " + RA3.Tools.Registry.GetRA3Path());
 Con.WriteLine("[Registry Status] " + RA3.Tools.Registry.Status);
 
-RA3.Tools.Registry.SetLanguage(RA3.Tools.Registry.GetRA3Path(), "chinese_t");
 
 Con.ReadKey();
