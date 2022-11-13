@@ -8,13 +8,13 @@ using System.Text;
 
 namespace Ra3.Tools
 {
-    public class RA3Instance
+    public class Instance
     {
         /// <summary>
         /// Private pre-defined name of QuickLoader.
         /// </summary>
         /// TODO: Download to AppData automatically.
-        private static readonly string _quickLoaderPath = "RA3.QuickLoader.exe";
+        private static readonly string _quickLoaderPath = "Ra3.QuickLoader.exe";
 
         /// <summary>
         /// Game install folder.

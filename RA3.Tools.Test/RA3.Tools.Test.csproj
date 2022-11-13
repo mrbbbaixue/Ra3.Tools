@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\RA3.Tools\RA3.Tools.csproj" />
+    <ProjectReference Include="..\Ra3.Tools\Ra3.Tools.csproj" />
   </ItemGroup>
 
 </Project>
