@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Win32;
 
-namespace RA3.Tools
+namespace Ra3.Tools
 {
     public static class Utility
     {
