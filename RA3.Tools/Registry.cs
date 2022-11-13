@@ -2,7 +2,7 @@
 using System.IO;
 using System.Linq;
 
-namespace RA3.Tools
+namespace Ra3.Tools
 {
     public static class Registry
     {

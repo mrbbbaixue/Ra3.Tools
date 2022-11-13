@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace RA3.Tools
+namespace Ra3.Tools
 {
     public class RA3Instance
     {
@@ -58,7 +58,7 @@ namespace RA3.Tools
             {
                 GamePath = gamePath;
             }
-            //Check if RA3.QuickLoader is avaliable.
+            //Check if Ra3.QuickLoader is avaliable.
             if (File.Exists(Path.GetFullPath(_quickLoaderPath)))
             {
                 UseBarLauncher = true;
@@ -89,14 +89,14 @@ namespace RA3.Tools
         /// <param name="executablePath">e.g. ra3_1.12.game</param>
         /// <param name="skudefPath">e.g. RA3_chinese_t_1.12.skudef</param>
         public static void LaunchUsingSkudef(string executablePath, string skudefPath)
-		{
+        {
             if (!File.Exists(executablePath))
                 throw new ArgumentException("Game not found.", nameof(executablePath));
             if (!File.Exists(skudefPath))
                 throw new ArgumentException("Skudef not found.");
             var startInfo = new ProcessStartInfo(executablePath, $"-config {skudefPath}");
             Process.Start(startInfo);
-		}
+        }
         // TODO: 与Launch合并
 
         public void Register()

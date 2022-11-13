@@ -1,4 +1,4 @@
-﻿using RA3.Tools;
+﻿using Ra3.Tools;
 using Con = System.Console;
 
 
@@ -15,8 +15,7 @@ Con.WriteLine("[Current Profile]");
 Con.WriteLine(ra3.GetCurrentProfile());
 Con.WriteLine();
 
-Con.WriteLine("[RA3 Path] " + RA3.Tools.Registry.GetRA3Path());
-Con.WriteLine("[Registry Status] " + RA3.Tools.Registry.Status);
-
+Con.WriteLine("[RA3 Path] " + Ra3.Tools.Registry.GetRA3Path());
+Con.WriteLine("[Registry Status] " + Ra3.Tools.Registry.Status);
 
 Con.ReadKey();
