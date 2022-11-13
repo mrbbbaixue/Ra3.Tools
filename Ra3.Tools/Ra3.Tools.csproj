@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <Authors>MrBBBaiXue</Authors>
+    <Company>MrBBBaiXue</Company>
+    <Description>A useful library for Command and Conquer : Red Alert 3.</Description>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageProjectUrl>https://github.com/MrBBBaiXue/Ra3.Tools</PackageProjectUrl>
+    <PackageIcon>Ra3.Tools.png</PackageIcon>
+    <RepositoryUrl>https://github.com/MrBBBaiXue/Ra3.Tools</RepositoryUrl>
+    <Version>1.1.1</Version>
+    <UserSecretsId>f29ab2a9-2d0a-4cd5-a893-d56121d4060a</UserSecretsId>
+    <AssemblyVersion>1.1.1.0</AssemblyVersion>
+    <FileVersion>1.1.1.0</FileVersion>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>game; red-alert-3;</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
+    <PackageReference Include="System.Diagnostics.Tools" Version="4.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+    <None Include="Ra3.Tools.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+</Project>
