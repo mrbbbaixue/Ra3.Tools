@@ -1,21 +1,20 @@
-﻿using Ra3.Tools;
-using Con = System.Console;
+﻿using Console = System.Console;
 
 
-var ra3 = new RA3Instance();
+var ra3 = new Ra3.Tools.Instance();
 
-Con.WriteLine("[Profiles]");
+Console.WriteLine("[Profiles]");
 foreach (var i in ra3.Profiles)
 {
-    Con.WriteLine(i);
+    Console.WriteLine(i);
 }
-Con.WriteLine();
+Console.WriteLine();
 
-Con.WriteLine("[Current Profile]");
-Con.WriteLine(ra3.GetCurrentProfile());
-Con.WriteLine();
+Console.WriteLine("[Current Profile]");
+Console.WriteLine(ra3.GetCurrentProfile());
+Console.WriteLine();
 
-Con.WriteLine("[RA3 Path] " + Ra3.Tools.Registry.GetRA3Path());
-Con.WriteLine("[Registry Status] " + Ra3.Tools.Registry.Status);
+Console.WriteLine("[RA3 Path] " + Ra3.Tools.Registry.GetRA3Path());
+Console.WriteLine("[Registry Status] " + Ra3.Tools.Registry.Status);
 
-Con.ReadKey();
+Console.ReadKey();

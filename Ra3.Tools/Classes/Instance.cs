@@ -47,7 +47,7 @@ namespace Ra3.Tools
         /// Red-Alert 3 Game Instance.
         /// </summary>  
         /// <param name="gamePath">Game install folder. Will Read from Registry if empty.</param>  
-        public RA3Instance(string gamePath = "")
+        public Instance(string gamePath = "")
         {
             //Read GamePath
             if (string.IsNullOrWhiteSpace(gamePath))
@@ -220,7 +220,7 @@ namespace Ra3.Tools
             return profiles;
         }
 
-        public string GetCurrentProfile()
+        public string? GetCurrentProfile()
         {
             try
             {
@@ -233,7 +233,7 @@ namespace Ra3.Tools
             }
         }
 
-        public void DeleteSkirmishINI(string profile)
+        public void DeleteSkirmishIni(string profile)
         {
             try
             {
@@ -242,11 +242,11 @@ namespace Ra3.Tools
             catch { }
         }
 
-        public void DeleteAllSkirmishINI()
+        public void DeleteAllSkirmishIni()
         {
-            foreach (var i in Profiles)
+            foreach (var profile in Profiles)
             {
-                DeleteSkirmishINI(i);
+                DeleteSkirmishIni(profile);
             }
         }
         #endregion
