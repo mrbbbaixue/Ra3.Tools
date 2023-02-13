@@ -17,4 +17,6 @@ Console.WriteLine();
 Console.WriteLine("[RA3 Path] " + Ra3.Tools.Registry.GetRA3Path());
 Console.WriteLine("[Registry Status] " + Ra3.Tools.Registry.Status);
 
+ra3.Launch();
+
 Console.ReadKey();
