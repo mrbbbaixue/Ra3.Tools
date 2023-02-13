@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Ra3.Tools.Classes;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -88,14 +89,21 @@ namespace Ra3.Tools
         /// </summary>
         /// <param name="executablePath">e.g. ra3_1.12.game</param>
         /// <param name="skudefPath">e.g. RA3_chinese_t_1.12.skudef</param>
-        public static void LaunchUsingSkudef(string executablePath, string skudefPath)
+        public static void LaunchUsingSkudef(string executablePath, string skudefPath, bool makeSureUnElevated = true)
         {
             if (!File.Exists(executablePath))
                 throw new ArgumentException("Game not found.", nameof(executablePath));
             if (!File.Exists(skudefPath))
                 throw new ArgumentException("Skudef not found.");
             var startInfo = new ProcessStartInfo(executablePath, $"-config {skudefPath}");
-            Process.Start(startInfo);
+            if (makeSureUnElevated)
+            {
+                SystemUtility.ShellExecuteUnElevated(startInfo);
+            }
+            else
+            {
+                Process.Start(startInfo);
+            }
         }
         // TODO: 与Launch合并
 
@@ -108,7 +116,7 @@ namespace Ra3.Tools
             }
         }
 
-        public void Launch()
+        public void Launch(bool makeSureUnElevated = true)
         {
             var LauncherPath = Path.Combine(GamePath, "RA3.exe");
             if ((UseBarLauncher == true) && File.Exists(_quickLoaderPath))
@@ -122,7 +130,14 @@ namespace Ra3.Tools
                 Arguments = LaunchParamter,
                 WorkingDirectory = GamePath
             };
-            Process.Start(ra3ProcessInfo);
+            if (makeSureUnElevated)
+            {
+                SystemUtility.ShellExecuteUnElevated(ra3ProcessInfo);
+            }
+            else
+            {
+                Process.Start(ra3ProcessInfo);
+            }
         }
 
         #endregion

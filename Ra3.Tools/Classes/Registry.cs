@@ -23,23 +23,22 @@ namespace Ra3.Tools
         private static RegistryStatus IsRegistryValid()
         {
             using var view32 = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32);
-            using var ra3 = view32.OpenSubKey("Software\\Electronic Arts\\Electronic Arts\\Red Alert 3", writable: true);
+            using var ra3 = view32.OpenSubKey("Software\\Electronic Arts\\Electronic Arts\\Red Alert 3", writable: false);
             if (ra3 == null)
             {
                 return RegistryStatus.NotExist;
             }
-            using var newra3 = view32.CreateSubKey("Software\\Electronic Arts\\Electronic Arts\\Red Alert 3", writable: true);
-            if (newra3.GetValue("Install Dir") == null)
+            if (ra3.GetValue("Install Dir") == null)
             {
                 return RegistryStatus.MissingPath;
             }
-            if (newra3.GetValue("UseLocalUserMap") == null || (int)newra3.GetValue("UseLocalUserMap") != 0)
+            if (ra3.GetValue("UseLocalUserMap") == null || (int)ra3.GetValue("UseLocalUserMap") != 0)
             {
                 return RegistryStatus.MissingMapSync;
             }
 
             using var viewUser = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Default);
-            using var languageRa3 = view32.OpenSubKey("Software\\Electronic Arts\\Electronic Arts\\Red Alert 3", writable: true);
+            using var languageRa3 = view32.OpenSubKey("Software\\Electronic Arts\\Electronic Arts\\Red Alert 3", writable: false);
             if (languageRa3 == null || languageRa3.GetValue("Language") == null)
             {
                 return RegistryStatus.MissingLanguage;
