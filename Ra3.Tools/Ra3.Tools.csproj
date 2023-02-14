@@ -11,10 +11,10 @@
     <PackageProjectUrl>https://github.com/MrBBBaiXue/Ra3.Tools</PackageProjectUrl>
     <PackageIcon>Ra3.Tools.png</PackageIcon>
     <RepositoryUrl>https://github.com/MrBBBaiXue/Ra3.Tools</RepositoryUrl>
-    <Version>1.1.1</Version>
+    <Version>1.1.2</Version>
     <UserSecretsId>f29ab2a9-2d0a-4cd5-a893-d56121d4060a</UserSecretsId>
-    <AssemblyVersion>1.1.1.0</AssemblyVersion>
-    <FileVersion>1.1.1.0</FileVersion>
+    <AssemblyVersion>1.1.2.0</AssemblyVersion>
+    <FileVersion>1.1.2.0</FileVersion>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>game; red-alert-3;</PackageTags>
   </PropertyGroup>
