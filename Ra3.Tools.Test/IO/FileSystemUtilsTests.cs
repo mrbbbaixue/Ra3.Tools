@@ -3,7 +3,7 @@ using Ra3.Tools.IO;
 
 namespace Ra3.Tools.Test.IO;
 
-public sealed class FileSystemServiceTests
+public sealed class FileSystemUtilsTests
 {
     [Fact]
     public async Task SharedFile_ReadAllBytesAsync_ReadsOpenFile()
@@ -33,7 +33,7 @@ public sealed class FileSystemServiceTests
 
         try
         {
-            FileSystemService.ClearDirectory(root, info => info.Name == "keep.txt");
+            FileSystemUtils.ClearDirectory(root, info => info.Name == "keep.txt");
             Assert.True(File.Exists(Path.Combine(root, "keep.txt")));
             Assert.False(File.Exists(Path.Combine(root, "delete.txt")));
         }
@@ -46,7 +46,7 @@ public sealed class FileSystemServiceTests
     [Fact]
     public void FormatSize_ReturnsHumanReadableValue()
     {
-        Assert.Equal("1.00KB", FileSystemService.FormatSize(1024));
+        Assert.Equal("1.00KB", FileSystemUtils.FormatSize(1024));
     }
 
     [Fact]
@@ -69,7 +69,7 @@ public sealed class FileSystemServiceTests
                 return; // 当前环境不支持创建 junction，跳过
             }
 
-            var size = FileSystemService.GetDirectorySizeBytes(root);
+            var size = FileSystemUtils.GetDirectorySizeBytes(root);
             Assert.Equal(4096, size); // 只统计 real 一次，不跟随 loop junction
         }
         finally

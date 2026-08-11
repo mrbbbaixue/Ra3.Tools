@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 namespace Ra3.Tools.Graphics;
 
 /// <summary>枚举当前主显示器的当前/支持显示模式（Win32 EnumDisplaySettings）。</summary>
-public sealed class WindowsDisplayService
+public sealed class WindowsDisplay
 {
     /// <summary>返回当前显示模式；查询失败返回 null。</summary>
     public DisplayMode? GetCurrentDisplayMode()

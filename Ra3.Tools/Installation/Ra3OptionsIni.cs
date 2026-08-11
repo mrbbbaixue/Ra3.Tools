@@ -1,7 +1,7 @@
 namespace Ra3.Tools.Installation;
 
 /// <summary>清理 RA3 玩家 Options.ini 中的危险设置（如防火墙端口覆盖）。</summary>
-public sealed class Ra3OptionsIniService
+public sealed class Ra3OptionsIni
 {
     private const string FirewallPortOverrideKey = "FirewallPortOverride";
 

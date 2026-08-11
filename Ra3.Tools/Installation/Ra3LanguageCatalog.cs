@@ -3,7 +3,7 @@ using Microsoft.Win32;
 namespace Ra3.Tools.Installation;
 
 /// <summary>枚举 RA3 安装支持的语言（Launcher\*.csf 与对应 SkuDef 匹配）并映射显示名。</summary>
-public sealed class Ra3LanguageService
+public sealed class Ra3LanguageCatalog
 {
     private static readonly IReadOnlyDictionary<string, string> DisplayLanguageMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
     {

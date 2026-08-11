@@ -3,7 +3,7 @@ using Force.Crc32;
 namespace Ra3.Tools.IO;
 
 /// <summary>计算 RA3 文件 CRC32C 校验值；Fast 模式对大文件只校验头尾各 32MiB。</summary>
-public static class ChecksumService
+public static class ChecksumCalculator
 {
     private const int FastLimitBytes = 65536 * 1024;
     private const int ChunkSizeBytes = FastLimitBytes / 2;

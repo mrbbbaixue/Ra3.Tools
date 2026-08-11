@@ -2,18 +2,18 @@ using Ra3.Tools.Patching;
 
 namespace Ra3.Tools.Test.Patching;
 
-public sealed class Ra3LargeAddressPatchServiceTests
+public sealed class Ra3LargeAddressPatcherTests
 {
     [Fact]
     public void EnableAndDisable_ToggleLargeAddressAwareAndCreateBackups()
     {
-        var sourceAssembly = typeof(Ra3LargeAddressPatchService).Assembly.Location;
+        var sourceAssembly = typeof(Ra3LargeAddressPatcher).Assembly.Location;
         var tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(tempDirectory);
         var tempPath = Path.Combine(tempDirectory, "ra3_1.12.game");
         File.Copy(sourceAssembly, tempPath, overwrite: true);
 
-        var service = new Ra3LargeAddressPatchService();
+        var service = new Ra3LargeAddressPatcher();
 
         try
         {

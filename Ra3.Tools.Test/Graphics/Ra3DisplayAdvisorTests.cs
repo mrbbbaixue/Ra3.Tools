@@ -34,4 +34,33 @@ public sealed class Ra3DisplayAdvisorTests
 
         Assert.NotEqual(new DisplayMode(800, 600, 60, 32), recommended);
     }
+
+    [Fact]
+    public void GetRecommendedDisplayMode_Prioritizes1610Profile()
+    {
+        var supported = new[]
+        {
+            new DisplayMode(1920, 1080, 60, 32),
+            new DisplayMode(1920, 1200, 60, 32),
+            new DisplayMode(1680, 1050, 60, 32)
+        };
+
+        var recommended = Ra3DisplayAdvisor.GetRecommendedDisplayMode(supported, new DisplayMode(1920, 1200, 60, 32));
+
+        Assert.Equal(new DisplayMode(1920, 1200, 60, 32), recommended);
+    }
+
+    [Fact]
+    public void GetRecommendedDisplayMode_FallsBackToSameAspectRatioWhenNoPreferred1610Mode()
+    {
+        var supported = new[]
+        {
+            new DisplayMode(1920, 1080, 60, 32),
+            new DisplayMode(1440, 900, 60, 32)
+        };
+
+        var recommended = Ra3DisplayAdvisor.GetRecommendedDisplayMode(supported, new DisplayMode(1440, 900, 60, 32));
+
+        Assert.Equal(new DisplayMode(1440, 900, 60, 32), recommended);
+    }
 }

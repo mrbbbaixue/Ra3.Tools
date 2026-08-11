@@ -3,7 +3,7 @@ using System.Management;
 namespace Ra3.Tools.Graphics;
 
 /// <summary>通过 WMI 枚举显卡并预测主显卡（优先 NVIDIA/AMD，跳过虚拟显卡）。</summary>
-public sealed class VideoControllerService
+public sealed class VideoControllerEnumerator
 {
     /// <summary>返回所有显卡名称；WMI 查询失败时返回空列表。</summary>
     public IReadOnlyList<string> GetAllControllers()

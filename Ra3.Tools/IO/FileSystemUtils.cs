@@ -3,7 +3,7 @@ using System.Diagnostics;
 namespace Ra3.Tools.IO;
 
 /// <summary>RA3 相关文件系统工具：目录大小、容量格式化、安全清理与资源管理器定位。</summary>
-public static class FileSystemService
+public static class FileSystemUtils
 {
     /// <summary>递归计算目录总大小（字节）；目录不存在返回 0。不跟随重解析点（junction/符号链接），避免目录环。</summary>
     /// <param name="path">目标目录路径。</param>

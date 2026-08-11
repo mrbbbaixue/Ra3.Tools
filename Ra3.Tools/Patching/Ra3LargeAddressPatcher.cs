@@ -7,7 +7,7 @@ namespace Ra3.Tools.Patching;
 /// 为 ra3_1.12.game 启用/关闭 4GB Patch（LARGEADDRESSAWARE 标志）。
 /// 只读写 PE COFF 头区域，不将整个游戏文件载入内存；修改前生成备份并校验除标志位外无其他差异。
 /// </summary>
-public sealed class Ra3LargeAddressPatchService
+public sealed class Ra3LargeAddressPatcher
 {
     // COFF 头内 Characteristics 位于偏移 18（Machine 2 + NumberOfSections 2 + TimeDateStamp 4 + PointerToSymbolTable 4 + NumberOfSymbols 4 + SizeOfOptionalHeader 2）。
     private const int CharacteristicsOffsetInCoffHeader = 18;

@@ -2,7 +2,7 @@ using Ra3.Tools.IO;
 
 namespace Ra3.Tools.Test.IO;
 
-public sealed class ChecksumServiceTests
+public sealed class ChecksumCalculatorTests
 {
     [Fact]
     public async Task ComputeCrc32cAsync_ReturnsSameResultForSmallFile()
@@ -12,8 +12,8 @@ public sealed class ChecksumServiceTests
 
         try
         {
-            var fast = await ChecksumService.ComputeCrc32cAsync(tempPath, ChecksumMode.Fast);
-            var full = await ChecksumService.ComputeCrc32cAsync(tempPath, ChecksumMode.Full);
+            var fast = await ChecksumCalculator.ComputeCrc32cAsync(tempPath, ChecksumMode.Fast);
+            var full = await ChecksumCalculator.ComputeCrc32cAsync(tempPath, ChecksumMode.Full);
             Assert.Equal(full, fast);
         }
         finally
@@ -34,8 +34,8 @@ public sealed class ChecksumServiceTests
 
         try
         {
-            var fast = await ChecksumService.ComputeCrc32cAsync(tempPath, ChecksumMode.Fast);
-            var full = await ChecksumService.ComputeCrc32cAsync(tempPath, ChecksumMode.Full);
+            var fast = await ChecksumCalculator.ComputeCrc32cAsync(tempPath, ChecksumMode.Fast);
+            var full = await ChecksumCalculator.ComputeCrc32cAsync(tempPath, ChecksumMode.Full);
             Assert.NotEqual(full, fast);
         }
         finally
@@ -52,8 +52,8 @@ public sealed class ChecksumServiceTests
 
         try
         {
-            var sync = ChecksumService.ComputeCrc32c(tempPath, ChecksumMode.Full);
-            var async = await ChecksumService.ComputeCrc32cAsync(tempPath, ChecksumMode.Full);
+            var sync = ChecksumCalculator.ComputeCrc32c(tempPath, ChecksumMode.Full);
+            var async = await ChecksumCalculator.ComputeCrc32cAsync(tempPath, ChecksumMode.Full);
             Assert.Equal(async, sync);
         }
         finally

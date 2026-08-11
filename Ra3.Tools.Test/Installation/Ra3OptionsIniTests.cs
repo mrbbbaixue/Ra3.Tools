@@ -4,7 +4,7 @@ using Ra3.Tools.Test.TestDoubles;
 
 namespace Ra3.Tools.Test.Installation;
 
-public sealed class Ra3OptionsIniServiceTests
+public sealed class Ra3OptionsIniTests
 {
     [Fact]
     public void RemoveFirewallPortOverrideFromAllProfiles_RemovesDangerousSetting()
@@ -21,7 +21,7 @@ public sealed class Ra3OptionsIniServiceTests
         Directory.CreateDirectory(profilePath);
         File.WriteAllText(Path.Combine(profilePath, "Options.ini"), "Resolution = 1920 1080\r\nFirewallPortOverride = 1234");
 
-        var service = new Ra3OptionsIniService();
+        var service = new Ra3OptionsIni();
 
         try
         {
@@ -51,7 +51,7 @@ public sealed class Ra3OptionsIniServiceTests
         File.WriteAllText(Path.Combine(profilePath, "Options.ini"),
             "[Settings]\r\nfirewallportoverride=9999\r\nFirewallPortOverrideExtra = 1\r\n;FirewallPortOverride comment");
 
-        var service = new Ra3OptionsIniService();
+        var service = new Ra3OptionsIni();
 
         try
         {

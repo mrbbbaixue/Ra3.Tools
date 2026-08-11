@@ -138,13 +138,13 @@ public sealed class Ra3Registry
             return false;
         }
 
-        var languageService = new Ra3LanguageService();
-        if (!languageService.GetValidLanguages(installPath).Contains(language, StringComparer.OrdinalIgnoreCase))
+        var languageCatalog = new Ra3LanguageCatalog();
+        if (!languageCatalog.GetValidLanguages(installPath).Contains(language, StringComparer.OrdinalIgnoreCase))
         {
             return false;
         }
 
-        _backend.SetValue(RegistryHive.LocalMachine, RegistryView.Registry32, GameRegistryPath, "language", Ra3LanguageService.GetDisplayLanguage(language), RegistryValueKind.String);
+        _backend.SetValue(RegistryHive.LocalMachine, RegistryView.Registry32, GameRegistryPath, "language", Ra3LanguageCatalog.GetDisplayLanguage(language), RegistryValueKind.String);
         _backend.SetValue(RegistryHive.CurrentUser, RegistryView.Default, GameRegistryPath, "Language", language, RegistryValueKind.String);
         return true;
     }

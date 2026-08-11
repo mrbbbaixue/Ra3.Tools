@@ -2,7 +2,7 @@ using Ra3.Tools.Installation;
 
 namespace Ra3.Tools.Test.Installation;
 
-public sealed class Ra3LanguageServiceTests
+public sealed class Ra3LanguageCatalogTests
 {
     [Fact]
     public void GetValidAndInvalidLanguages_ReturnExpectedResults()
@@ -14,7 +14,7 @@ public sealed class Ra3LanguageServiceTests
 
         try
         {
-            var service = new Ra3LanguageService();
+            var service = new Ra3LanguageCatalog();
 
             var valid = service.GetValidLanguages(installPath);
             var invalid = service.GetInvalidLanguageFiles(installPath);
