@@ -1,6 +1,5 @@
 using AsmResolver.IO;
 using AsmResolver.PE.File;
-using AsmResolver.PE.File.Headers;
 using Ra3.Tools.IO;
 
 namespace Ra3.Tools.Patching;
