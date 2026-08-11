@@ -43,4 +43,22 @@ public sealed class ChecksumServiceTests
             File.Delete(tempPath);
         }
     }
+
+    [Fact]
+    public async Task ComputeCrc32c_SyncOverload_MatchesAsyncResult()
+    {
+        var tempPath = Path.GetTempFileName();
+        File.WriteAllText(tempPath, "hello world");
+
+        try
+        {
+            var sync = ChecksumService.ComputeCrc32c(tempPath, ChecksumMode.Full);
+            var async = await ChecksumService.ComputeCrc32cAsync(tempPath, ChecksumMode.Full);
+            Assert.Equal(async, sync);
+        }
+        finally
+        {
+            File.Delete(tempPath);
+        }
+    }
 }

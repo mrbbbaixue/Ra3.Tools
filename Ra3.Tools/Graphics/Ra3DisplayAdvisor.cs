@@ -1,5 +1,6 @@
 namespace Ra3.Tools.Graphics;
 
+/// <summary>根据显示器纵横比与 RA3 偏好分辨率，从支持的模式中推荐最佳分辨率。</summary>
 public static class Ra3DisplayAdvisor
 {
     private sealed record ResolutionProfile(string Name, double AspectRatio, (int Width, int Height)[] PreferredModes);
@@ -13,6 +14,9 @@ public static class Ra3DisplayAdvisor
 
     private static readonly ResolutionProfile DefaultProfile = Profiles[1];
 
+    /// <summary>返回推荐显示模式；无可用模式时返回 null。优先匹配当前纵横比的首选分辨率，其次 16:9。</summary>
+    /// <param name="supported">显示器支持的模式集合。</param>
+    /// <param name="current">当前显示模式（可为 null）。</param>
     public static DisplayMode? GetRecommendedDisplayMode(IReadOnlyCollection<DisplayMode> supported, DisplayMode? current)
     {
         if (supported.Count == 0)

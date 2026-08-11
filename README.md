@@ -10,11 +10,14 @@ Windows-only RA3 SDK for local installation management, launch helpers, SkuDef e
 
 - RA3 installation validation and known path discovery
 - Registry read, repair, and language switching
-- Launch helpers for normal, browser, and windowed modes
+- Launch helpers for normal, browser, and windowed modes, with optional SkuDef config
 - SkuDef load/save with raw line preservation
 - 4GB patch enable/disable for `ra3_1.12.game`
 - Display mode enumeration and RA3 resolution recommendation
+- Map package (zip) installation with Zip Slip protection
+- Steam AppID generation (`steam_appid.txt`)
 - Shared file access and CRC32C checksum helpers
+- RA3 version parsing and matching (`1.12`, `1.13`, channel letters like `4.02N`)
 
 ## Package
 
@@ -93,6 +96,26 @@ var current = displayService.GetCurrentDisplayMode();
 var recommended = Ra3DisplayAdvisor.GetRecommendedDisplayMode(supported, current);
 ```
 
+### Install map package
+
+```csharp
+using Ra3.Tools.IO;
+using Ra3.Tools.Installation;
+
+var installed = ZipMapInstaller.InstallMapPackage(@"D:\Downloads\map_pack.zip", Ra3KnownPaths.MapsDirectoryPath);
+```
+
+### Generate Steam AppID
+
+```csharp
+using Ra3.Tools.Installation;
+
+if (Ra3InstallationValidator.NeedsSteamAppId(@"D:\Games\Red Alert 3"))
+{
+    Ra3InstallationValidator.GenerateSteamAppId(@"D:\Games\Red Alert 3");
+}
+```
+
 ## Namespaces
 
 - `Ra3.Tools.Installation`
@@ -104,5 +127,5 @@ var recommended = Ra3DisplayAdvisor.GetRecommendedDisplayMode(supported, current
 
 ## Notes
 
-- Target framework: `net8.0-windows7.0`
+- Target framework: `net10.0-windows7.0`
 - This package only contains local RA3 tooling. It does not include updater, downloader, platform networking, or product-specific mod logic.

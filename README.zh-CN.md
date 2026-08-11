@@ -10,11 +10,14 @@
 
 - 检测 RA3 安装目录并定位常用路径
 - 读取、修复注册表并切换语言
-- 支持普通启动、游戏大厅启动和窗口化启动
+- 支持普通启动、游戏大厅启动和窗口化启动，可附带 SkuDef 配置
 - 读取和写回 SkuDef，同时保留未知原始行
 - 为 `ra3_1.12.game` 启用或关闭 4GB Patch
 - 枚举显示模式并给出适合 RA3 的推荐分辨率
+- 地图 zip 包安装（防 Zip Slip）
+- 生成 Steam AppID（steam_appid.txt）
 - 提供共享文件读取和 CRC32C 校验工具
+- 解析和匹配 RA3 版本号（1.12、1.13，及 4.02N 等渠道版本）
 
 ## 安装
 
@@ -93,6 +96,26 @@ var current = displayService.GetCurrentDisplayMode();
 var recommended = Ra3DisplayAdvisor.GetRecommendedDisplayMode(supported, current);
 ```
 
+### 安装地图包
+
+```csharp
+using Ra3.Tools.IO;
+using Ra3.Tools.Installation;
+
+var installed = ZipMapInstaller.InstallMapPackage(@"D:\Downloads\map_pack.zip", Ra3KnownPaths.MapsDirectoryPath);
+```
+
+### 生成 Steam AppID
+
+```csharp
+using Ra3.Tools.Installation;
+
+if (Ra3InstallationValidator.NeedsSteamAppId(@"D:\Games\Red Alert 3"))
+{
+    Ra3InstallationValidator.GenerateSteamAppId(@"D:\Games\Red Alert 3");
+}
+```
+
 ## 命名空间
 
 - `Ra3.Tools.Installation`
@@ -104,5 +127,5 @@ var recommended = Ra3DisplayAdvisor.GetRecommendedDisplayMode(supported, current
 
 ## 说明
 
-- 目标框架：`net8.0-windows7.0`
+- 目标框架：`net10.0-windows7.0`
 - 这个包只包含本地 RA3 工具能力，不包含更新器、下载器、联机平台逻辑和任何产品专属模组逻辑。

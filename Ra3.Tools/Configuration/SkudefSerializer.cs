@@ -1,7 +1,10 @@
 namespace Ra3.Tools.Configuration;
 
+/// <summary>SkuDef 文件的加载与保存（未知行以 <see cref="RawEntry"/> 原样保留）。</summary>
 public static class SkudefSerializer
 {
+    /// <summary>从文件加载 SkuDef 文档；文件不存在时返回仅含默认头行的空文档。</summary>
+    /// <param name="path">SkuDef 文件路径。</param>
     public static SkudefDocument Load(string path)
     {
         var entries = new List<SkudefEntry>();
@@ -49,6 +52,9 @@ public static class SkudefSerializer
         return new SkudefDocument(header, entries);
     }
 
+    /// <summary>把 SkuDef 文档写回文件（未知原始行逐字保留）。</summary>
+    /// <param name="path">目标文件路径。</param>
+    /// <param name="document">要保存的文档。</param>
     public static void Save(string path, SkudefDocument document)
     {
         ArgumentNullException.ThrowIfNull(document);

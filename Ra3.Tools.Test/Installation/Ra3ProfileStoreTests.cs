@@ -75,6 +75,35 @@ public sealed class Ra3ProfileStoreTests
         }
     }
 
+    [Fact]
+    public void GetProfiles_WithMalformedDirectoryIni_DoesNotThrow()
+    {
+        var root = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+        var originalProvider = SpecialFolderProvider.Current;
+        SpecialFolderProvider.Current = new TestSpecialFolderProvider
+        {
+            MyDocumentsPath = root,
+            ApplicationDataPath = root
+        };
+        var installation = new Ra3Installation(root);
+        Directory.CreateDirectory(installation.ProfilesDirectoryPath);
+        File.WriteAllLines(Path.Combine(installation.ProfilesDirectoryPath, "directory.ini"), ["PlayerOne_"]);
+
+        var store = new Ra3ProfileStore();
+
+        try
+        {
+            var profiles = store.GetProfiles(installation);
+            Assert.NotNull(profiles);
+            Assert.Null(store.GetCurrentProfile(installation));
+        }
+        finally
+        {
+            SpecialFolderProvider.Current = originalProvider;
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
     private static string EncodeDirectoryString(string value)
     {
         var builder = new StringBuilder();

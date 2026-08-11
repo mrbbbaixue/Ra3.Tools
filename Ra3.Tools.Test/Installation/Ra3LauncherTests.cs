@@ -24,4 +24,32 @@ public sealed class Ra3LauncherTests
 
         Assert.Equal("-win", startInfo.Arguments);
     }
+
+    [Fact]
+    public void BuildStartInfo_AppendsConfigArgumentWhenSkudefSpecified()
+    {
+        var options = new Ra3LaunchOptions("-runver 1.12", Ra3LaunchMode.GameBrowser, EnsureUnelevated: false, SkudefPath: @"D:\Mods\example.skudef");
+
+        var startInfo = Ra3Launcher.BuildStartInfo("RA3.exe", "D:\\Games\\RA3", options);
+
+        Assert.Equal("-ui -config \"D:\\Mods\\example.skudef\" -runver 1.12", startInfo.Arguments);
+    }
+
+    [Fact]
+    public void Launch_WithMissingSkudef_Throws()
+    {
+        var root = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(root);
+        var installation = new Ra3Installation(root);
+        var options = new Ra3LaunchOptions(string.Empty, SkudefPath: Path.Combine(root, "missing.skudef"));
+
+        try
+        {
+            Assert.Throws<FileNotFoundException>(() => new Ra3Launcher().Launch(installation, options));
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
 }

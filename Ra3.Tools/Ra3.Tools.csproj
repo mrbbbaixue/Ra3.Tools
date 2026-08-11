@@ -11,9 +11,6 @@
     <PackageProjectUrl>https://github.com/MrBBBaiXue/Ra3.Tools</PackageProjectUrl>
     <PackageIcon>Ra3.Tools.png</PackageIcon>
     <RepositoryUrl>https://github.com/MrBBBaiXue/Ra3.Tools</RepositoryUrl>
-    <Version>2.0.0</Version>
-    <AssemblyVersion>2.0.0.0</AssemblyVersion>
-    <FileVersion>2.0.0.0</FileVersion>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>game; red-alert-3; windows;</PackageTags>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -25,12 +22,12 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <NoWarn>$(NoWarn);1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="AsmResolver.PE" Version="6.0.0" />
     <PackageReference Include="Crc32.NET" Version="1.2.0" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="all" />
     <PackageReference Include="System.Management" Version="10.0.10" />
   </ItemGroup>
 

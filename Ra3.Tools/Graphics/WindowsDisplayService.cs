@@ -2,14 +2,17 @@ using System.Runtime.InteropServices;
 
 namespace Ra3.Tools.Graphics;
 
+/// <summary>枚举当前主显示器的当前/支持显示模式（Win32 EnumDisplaySettings）。</summary>
 public sealed class WindowsDisplayService
 {
+    /// <summary>返回当前显示模式；查询失败返回 null。</summary>
     public DisplayMode? GetCurrentDisplayMode()
     {
         var mode = CreateDeviceMode();
         return EnumDisplaySettings(null, EnumCurrentSettings, ref mode) ? Convert(mode) : null;
     }
 
+    /// <summary>返回主显示器支持的全部显示模式。</summary>
     public IReadOnlyList<DisplayMode> GetSupportedDisplayModes()
     {
         var result = new List<DisplayMode>();
@@ -24,6 +27,9 @@ public sealed class WindowsDisplayService
         return result;
     }
 
+    /// <summary>判断指定分辨率是否为当前显示器支持的模式。</summary>
+    /// <param name="width">宽度（像素）。</param>
+    /// <param name="height">高度（像素）。</param>
     public bool IsSupported(int width, int height)
     {
         return GetSupportedDisplayModes().Any(mode => mode.Width == width && mode.Height == height);

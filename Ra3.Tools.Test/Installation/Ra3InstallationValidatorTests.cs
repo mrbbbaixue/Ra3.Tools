@@ -51,6 +51,26 @@ public sealed class Ra3InstallationValidatorTests
         }
     }
 
+    [Fact]
+    public void GenerateSteamAppId_WritesAppIdFile()
+    {
+        var installPath = CreateInstallDirectory(includeLauncher: false, baseFolderName: "steam_ra3");
+
+        try
+        {
+            Assert.True(Ra3InstallationValidator.NeedsSteamAppId(installPath));
+
+            Ra3InstallationValidator.GenerateSteamAppId(installPath);
+
+            Assert.False(Ra3InstallationValidator.NeedsSteamAppId(installPath));
+            Assert.Equal("17480", File.ReadAllText(Path.Combine(installPath, "steam_appid.txt")));
+        }
+        finally
+        {
+            Directory.Delete(installPath, recursive: true);
+        }
+    }
+
     internal static string CreateInstallDirectory(bool includeLauncher, string baseFolderName = "ra3_install")
     {
         var installPath = Path.Combine(Path.GetTempPath(), baseFolderName, Guid.NewGuid().ToString("N"));

@@ -2,10 +2,13 @@ using System.Text;
 
 namespace Ra3.Tools.Installation;
 
+/// <summary>解析 RA3 进程命令行，定位游戏可执行文件与校验 RA3 特征（支持引号/转义参数拆分）。</summary>
 public static class Ra3CommandLine
 {
     private const string GameFileMarker = "<<< DID YOU REMEMBER TO BUILD DATA??? >>>";
 
+    /// <summary>从命令行中提取 RA3 可执行文件路径；找不到返回 null。</summary>
+    /// <param name="commandLine">进程命令行字符串。</param>
     public static string? TryExtractGameExecutablePath(string commandLine)
     {
         if (string.IsNullOrWhiteSpace(commandLine))
@@ -40,6 +43,8 @@ public static class Ra3CommandLine
         return null;
     }
 
+    /// <summary>判断路径是否为 RA3 风格可执行文件（RA3.exe + Data\ra3_1.12.game、ra3_1.12.game，或包含游戏构建标记的文件）。</summary>
+    /// <param name="path">候选路径。</param>
     public static bool IsRa3LikeExecutable(string path)
     {
         if (string.IsNullOrWhiteSpace(path) || !File.Exists(path) || Directory.Exists(path))
