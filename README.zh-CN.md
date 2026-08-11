@@ -16,6 +16,7 @@
 - 枚举显示模式并给出适合 RA3 的推荐分辨率
 - 地图 zip 包安装（防 Zip Slip）
 - 生成 Steam AppID（steam_appid.txt）
+- 解析 RA3 在线档案（GameSpyLogin.ini 账号与密码解密、ProfileData.ini 游戏 ID）
 - 提供共享文件读取和 CRC32C 校验工具
 - 解析和匹配 RA3 版本号（1.12、1.13，及 4.02N 等渠道版本）
 
@@ -116,6 +117,21 @@ if (Ra3InstallationValidator.NeedsSteamAppId(@"D:\Games\Red Alert 3"))
 }
 ```
 
+### 解析在线档案
+
+```csharp
+using Ra3.Tools.Profiles;
+
+var login = GameSpyLoginDocument.Load(@"%appdata%\Red Alert 3\Profiles\PlayerOne\GameSpyLogin.ini");
+foreach (var account in login.Accounts)
+{
+    Console.WriteLine($"{account.Email} / {account.Nickname} / {account.DecryptPassword()}");
+}
+
+var identity = Ra3ProfileData.Load(@"%appdata%\Red Alert 3\Profiles\PlayerOne\ProfileData.ini");
+Console.WriteLine(identity.PublicKey); // 游戏 ID（PPK）
+```
+
 ## 命名空间
 
 - `Ra3.Tools.Installation`
@@ -123,6 +139,7 @@ if (Ra3InstallationValidator.NeedsSteamAppId(@"D:\Games\Red Alert 3"))
 - `Ra3.Tools.Graphics`
 - `Ra3.Tools.IO`
 - `Ra3.Tools.Patching`
+- `Ra3.Tools.Profiles`
 - `Ra3.Tools.Versioning`
 
 ## 说明

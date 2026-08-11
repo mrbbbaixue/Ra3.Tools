@@ -16,6 +16,7 @@ Windows-only RA3 SDK for local installation management, launch helpers, SkuDef e
 - Display mode enumeration and RA3 resolution recommendation
 - Map package (zip) installation with Zip Slip protection
 - Steam AppID generation (`steam_appid.txt`)
+- RA3 online profile parsing (GameSpyLogin.ini accounts with password decryption, ProfileData.ini player ID)
 - Shared file access and CRC32C checksum helpers
 - RA3 version parsing and matching (`1.12`, `1.13`, channel letters like `4.02N`)
 
@@ -116,6 +117,21 @@ if (Ra3InstallationValidator.NeedsSteamAppId(@"D:\Games\Red Alert 3"))
 }
 ```
 
+### Parse online profile data
+
+```csharp
+using Ra3.Tools.Profiles;
+
+var login = GameSpyLoginDocument.Load(@"%appdata%\Red Alert 3\Profiles\PlayerOne\GameSpyLogin.ini");
+foreach (var account in login.Accounts)
+{
+    Console.WriteLine($"{account.Email} / {account.Nickname} / {account.DecryptPassword()}");
+}
+
+var identity = Ra3ProfileData.Load(@"%appdata%\Red Alert 3\Profiles\PlayerOne\ProfileData.ini");
+Console.WriteLine(identity.PublicKey); // player ID (PPK)
+```
+
 ## Namespaces
 
 - `Ra3.Tools.Installation`
@@ -123,6 +139,7 @@ if (Ra3InstallationValidator.NeedsSteamAppId(@"D:\Games\Red Alert 3"))
 - `Ra3.Tools.Graphics`
 - `Ra3.Tools.IO`
 - `Ra3.Tools.Patching`
+- `Ra3.Tools.Profiles`
 - `Ra3.Tools.Versioning`
 
 ## Notes
