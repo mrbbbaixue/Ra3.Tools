@@ -46,6 +46,14 @@ public sealed class Ra3VersionTests
     }
 
     [Fact]
+    public void Compare_EqualVersionsWithoutChannelReturnZero()
+    {
+        // 回归：数字相同且都没有渠道字母时不得抛异常（真实安装中多语言 SkuDef 版本相同，如 RA3_chinese_t_1.12.SkuDef 与 RA3_english_1.12.SkuDef）。
+        Assert.Equal(0, Ra3Version.Parse("1.12").CompareTo(Ra3Version.Parse("1.12")));
+        Assert.Equal(0, Ra3Version.Parse("1.13").CompareTo(Ra3Version.Parse("1.13")));
+    }
+
+    [Fact]
     public void Ra3VersionPattern_MatchesConfiguredPrefixAndSuffix()
     {
         var pattern = new Ra3VersionPattern("mod_", ".pkg");

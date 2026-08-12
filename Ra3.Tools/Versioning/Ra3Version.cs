@@ -131,7 +131,8 @@ public readonly record struct Ra3Version(int Major, string MinorPart) : ICompara
             return -1;
         }
 
-        return leftParts.Channel!.Value.CompareTo(rightParts.Channel!.Value);
+        // 数字相同且渠道字母相同（或都没有渠道字母）→ 版本相等
+        return leftParts.Channel?.CompareTo(rightParts.Channel) ?? 0;
     }
 
     private static (int Numeric, char? Channel) SplitMinor(string minor)
