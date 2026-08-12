@@ -127,7 +127,10 @@ public sealed class Ra3GameLauncher
             FileName = executablePath,
             WorkingDirectory = installation.RootPath,
             Arguments = string.Join(' ', arguments).Trim(),
-            UseShellExecute = !options.EnsureUnelevated
+            // 必须 CreateProcess 直启（不经 shell 文件关联）：游戏本体是 .game 扩展名，
+            // 无默认关联时 ShellExecute 会弹"打开方式"对话框（RA3Bar 也是 CreateProcessW 直启）。
+            // 注意：EnsureUnelevated 走 shell 非提权路径（UnelevatedProcessLauncher）时不受本字段控制。
+            UseShellExecute = false
         };
     }
 }

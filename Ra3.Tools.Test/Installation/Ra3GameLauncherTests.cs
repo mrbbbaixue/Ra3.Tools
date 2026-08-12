@@ -15,7 +15,8 @@ public sealed class Ra3GameLauncherTests
         Assert.Equal(Path.Combine(installPath, "Data", "RA3_1.12.game"), startInfo.FileName);
         Assert.Equal($"-config \"{Path.Combine(installPath, "RA3_chinese_t_1.12.SkuDef")}\"", startInfo.Arguments);
         Assert.Equal(installPath, startInfo.WorkingDirectory);
-        Assert.True(startInfo.UseShellExecute);
+        // .game 无文件关联，必须 CreateProcess 直启（UseShellExecute=false），否则弹"打开方式"。
+        Assert.False(startInfo.UseShellExecute);
     }
 
     [Fact]
