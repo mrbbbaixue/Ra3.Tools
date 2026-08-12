@@ -39,4 +39,9 @@ jobs:
           user: MrBBBaiXue   # nuget.org 用户名；如想用 secret 可改为 ${{ secrets.NUGET_USER }}
 
       - name: NuGet push
-        run: dotnet nuget push artifacts/*.nupkg --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json
+        shell: pwsh
+        run: |
+          # PowerShell 不会对原生命令展开通配符，dotnet nuget push 也不支持 glob，需逐包推送
+          Get-ChildItem artifacts/*.nupkg | ForEach-Object {
+            dotnet nuget push $_.FullName --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json
+          }
