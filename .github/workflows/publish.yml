@@ -1,0 +1,42 @@
+name: Publish
+
+on:
+  workflow_dispatch:
+  push:
+    tags: [ 'v*' ]
+
+jobs:
+  publish:
+    runs-on: windows-latest
+    environment: production
+    permissions:
+      id-token: write   # 签发 OIDC 令牌，换取 nuget.org 短期 API key（受信任发布）
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        run: dotnet restore Ra3.Tools.sln
+
+      - name: Build
+        run: dotnet build Ra3.Tools.sln --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test Ra3.Tools.sln --configuration Release --no-build
+
+      - name: Pack
+        run: dotnet pack Ra3.Tools/Ra3.Tools.csproj --configuration Release --no-build --output artifacts
+
+      - name: NuGet login (OIDC -> temp API key)
+        id: login
+        uses: NuGet/login@v1
+        with:
+          user: MrBBBaiXue   # nuget.org 用户名；如想用 secret 可改为 ${{ secrets.NUGET_USER }}
+
+      - name: NuGet push
+        run: dotnet nuget push artifacts/*.nupkg --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json
