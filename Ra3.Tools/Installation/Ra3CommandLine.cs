@@ -81,7 +81,7 @@ public static class Ra3CommandLine
         }
     }
 
-    private static IEnumerable<string> SplitArgs(string commandLine)
+    internal static IEnumerable<string> SplitArgs(string commandLine)
     {
         var result = new StringBuilder();
         var quoted = false;

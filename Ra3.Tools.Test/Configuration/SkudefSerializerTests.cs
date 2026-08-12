@@ -34,4 +34,29 @@ public sealed class SkudefSerializerTests
             File.Delete(tempPath);
         }
     }
+
+    [Fact]
+    public void LoadAndSave_RoundTripsSetExeEntry()
+    {
+        var tempPath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():N}.skudef");
+        File.WriteAllLines(tempPath,
+        [
+            "mod-game 1.12",
+            "set-exe Data\\RA3_1.12.game"
+        ]);
+
+        try
+        {
+            var document = SkudefSerializer.Load(tempPath);
+            SkudefSerializer.Save(tempPath, document);
+
+            var setExe = Assert.Single(document.Entries.OfType<SetExeEntry>());
+            Assert.Equal(@"Data\RA3_1.12.game", setExe.Path);
+            Assert.Contains("set-exe Data\\RA3_1.12.game", File.ReadAllLines(tempPath));
+        }
+        finally
+        {
+            File.Delete(tempPath);
+        }
+    }
 }

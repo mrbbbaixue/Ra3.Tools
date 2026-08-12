@@ -46,6 +46,12 @@ public static class SkudefSerializer
                 continue;
             }
 
+            if (line.StartsWith("set-exe ", StringComparison.OrdinalIgnoreCase))
+            {
+                entries.Add(new SetExeEntry(line["set-exe ".Length..].Trim().Trim('"')));
+                continue;
+            }
+
             entries.Add(new RawEntry(line));
         }
 
@@ -67,6 +73,7 @@ public static class SkudefSerializer
                 SetSearchPathEntry searchPath => $"set-search-path {searchPath.Command}",
                 AddConfigEntry config => $"add-config {config.Path}",
                 AddBigEntry big => $"add-big {big.Path}",
+                SetExeEntry exe => $"set-exe {exe.Path}",
                 RawEntry raw => raw.Text,
                 _ => throw new NotSupportedException($"Unsupported skudef entry type: {entry.GetType().FullName}")
             });
