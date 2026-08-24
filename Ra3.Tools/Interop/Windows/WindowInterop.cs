@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -63,7 +64,11 @@ internal static class WindowInterop
     /// <param name="windowHandle">窗口句柄。</param>
     internal static Rect GetWindowRect(IntPtr windowHandle)
     {
-        GetWindowRectNative(windowHandle, out var rect);
+        if (!GetWindowRectNative(windowHandle, out var rect))
+        {
+            throw new Win32Exception();
+        }
+
         return rect;
     }
 
@@ -125,7 +130,7 @@ internal static class WindowInterop
     [DllImport("user32.dll", SetLastError = true)]
     private static extern IntPtr SendMessageTimeoutW(IntPtr window, uint message, IntPtr wParam, IntPtr lParam, uint flags, uint timeout, out IntPtr result);
 
-    [DllImport("user32.dll")]
+    [DllImport("user32.dll", EntryPoint = "GetWindowRect", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool GetWindowRectNative(IntPtr window, out Rect rect);
 

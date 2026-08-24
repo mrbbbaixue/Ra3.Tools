@@ -39,7 +39,7 @@ public sealed class Ra3GameLauncher
         // RA3Bar 无边框全屏修正：窗口化启动时等游戏窗口出现后按 -fullscreen/-xres/-yres 居中，-x/-y 显式定位。
         var adjustment = Ra3GameWindow.ParseFromArguments(options.Arguments, windowed: options.LaunchMode == Ra3LaunchMode.Windowed);
         if (adjustment is { } pending && (pending.Fullscreen || pending.X is not null || pending.Y is not null) &&
-            Ra3GameWindow.TryFindWindow(process, out var windowHandle))
+            Ra3GameWindow.TryFindWindow(process, out var windowHandle, timeoutMilliseconds: 0))
         {
             Ra3GameWindow.AdjustPosition(windowHandle, pending);
         }

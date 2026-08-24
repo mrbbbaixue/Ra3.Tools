@@ -130,6 +130,16 @@ public sealed class Ra3GameWindowTests
     }
 
     [Fact]
+    public void GetWindowRect_DesktopWindow_HasPositiveSize()
+    {
+        var desktop = WindowInterop.GetDesktopWindowHandle();
+        var rect = WindowInterop.GetWindowRect(desktop);
+
+        Assert.True(rect.Width > 0);
+        Assert.True(rect.Height > 0);
+    }
+
+    [Fact]
     public void ComputePosition_FullscreenWithoutResolutionKeepsCurrentPosition()
     {
         var current = new WindowInterop.Rect { Left = 42, Top = 24, Right = 1962, Bottom = 1104 };
