@@ -140,15 +140,83 @@ public sealed class Ra3GameWindowTests
     }
 
     [Fact]
-    public void ComputePosition_FullscreenWithoutResolutionKeepsCurrentPosition()
+    public void GetMonitorRect_DesktopWindow_HasPositiveSize()
     {
+        var desktop = WindowInterop.GetDesktopWindowHandle();
+        var rect = WindowInterop.GetMonitorRect(desktop);
+
+        Assert.True(rect.Width > 0);
+        Assert.True(rect.Height > 0);
+    }
+
+    [Fact]
+    public void ComputePosition_FullscreenCentersByActualWindowSizeWithoutResolution()
+    {
+        // 未指定 -xres/-yres 时也按窗口实际尺寸居中（三重等待通过后实际尺寸就是用户设置的最终分辨率）。
         var current = new WindowInterop.Rect { Left = 42, Top = 24, Right = 1962, Bottom = 1104 };
-        var desktop = new WindowInterop.Rect { Left = 0, Top = 0, Right = 2560, Bottom = 1440 };
+        var monitor = new WindowInterop.Rect { Left = 0, Top = 0, Right = 2560, Bottom = 1440 };
         var adjustment = new Ra3WindowAdjustment(Fullscreen: true, null, null, null, null, AllowAlwaysOnTop: false);
 
-        var (left, top) = Ra3GameWindow.ComputePosition(current, desktop, adjustment);
+        var (left, top) = Ra3GameWindow.ComputePosition(current, monitor, adjustment);
 
-        Assert.Equal(42, left);
-        Assert.Equal(24, top);
+        Assert.Equal((2560 - 1920) / 2, left);
+        Assert.Equal((1440 - 1080) / 2, top);
+    }
+
+    [Fact]
+    public void ComputePosition_HidpiPhysicalResolutionDoesNotPushWindowOffScreen()
+    {
+        // HiDPI 回归：4K@150% 下 DPI unaware 进程看到 2560×1440 虚拟桌面，命令行却传了物理 -xres 3840 -yres 2160。
+        // 旧算法（按 -xres 居中）得 (-640,-360)，窗口被推出屏幕；新算法按窗口实际尺寸居中 → (0,0) 正好铺满。
+        var current = new WindowInterop.Rect { Left = -640, Top = -360, Right = 1920, Bottom = 1080 };
+        var monitor = new WindowInterop.Rect { Left = 0, Top = 0, Right = 2560, Bottom = 1440 };
+        var adjustment = new Ra3WindowAdjustment(Fullscreen: true, 3840, 2160, null, null, AllowAlwaysOnTop: false);
+
+        var (left, top) = Ra3GameWindow.ComputePosition(current, monitor, adjustment);
+
+        Assert.Equal(0, left);
+        Assert.Equal(0, top);
+    }
+
+    [Fact]
+    public void ComputePosition_OversizedWindowOverflowsSymmetrically()
+    {
+        // 窗口比显示器还大（如用户强传超大 -xres 而游戏没 clamp）：对称越界是最优放置，不再整体偏出屏幕。
+        var current = new WindowInterop.Rect { Left = 0, Top = 0, Right = 3840, Bottom = 2160 };
+        var monitor = new WindowInterop.Rect { Left = 0, Top = 0, Right = 2560, Bottom = 1440 };
+        var adjustment = new Ra3WindowAdjustment(Fullscreen: true, 3840, 2160, null, null, AllowAlwaysOnTop: false);
+
+        var (left, top) = Ra3GameWindow.ComputePosition(current, monitor, adjustment);
+
+        Assert.Equal((2560 - 3840) / 2, left);
+        Assert.Equal((1440 - 2160) / 2, top);
+    }
+
+    [Fact]
+    public void ComputePosition_CentersWithinMonitorOrigin_NoSeamOnNegativeOriginMonitor()
+    {
+        // 负原点的左侧副显示器（Left=-1920）：居中基准必须是显示器本身而非桌面并集，
+        // 否则 1920 宽的无边框窗口会横跨两个显示器留下"缝"；按显示器居中应正好铺满它（Left=-1920）。
+        var current = new WindowInterop.Rect { Left = -600, Top = 0, Right = 1320, Bottom = 1080 };
+        var monitor = new WindowInterop.Rect { Left = -1920, Top = 0, Right = 0, Bottom = 1080 };
+        var adjustment = new Ra3WindowAdjustment(Fullscreen: true, 1920, 1080, null, null, AllowAlwaysOnTop: false);
+
+        var (left, top) = Ra3GameWindow.ComputePosition(current, monitor, adjustment);
+
+        Assert.Equal(-1920, left);
+        Assert.Equal(0, top);
+    }
+
+    [Fact]
+    public void ComputePosition_CentersSmallerWindowWithinMonitorOrigin()
+    {
+        var current = new WindowInterop.Rect { Left = 0, Top = 0, Right = 1600, Bottom = 900 };
+        var monitor = new WindowInterop.Rect { Left = -1920, Top = 0, Right = 0, Bottom = 1080 };
+        var adjustment = new Ra3WindowAdjustment(Fullscreen: true, 1600, 900, null, null, AllowAlwaysOnTop: false);
+
+        var (left, top) = Ra3GameWindow.ComputePosition(current, monitor, adjustment);
+
+        Assert.Equal(-1920 + (1920 - 1600) / 2, left);
+        Assert.Equal(0 + (1080 - 900) / 2, top);
     }
 }

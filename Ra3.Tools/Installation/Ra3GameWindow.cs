@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Diagnostics;
 using Ra3.Tools.Interop.Windows;
 
@@ -5,8 +6,12 @@ namespace Ra3.Tools.Installation;
 
 /// <summary>
 /// RA3 游戏窗口查找与无边框全屏（-win -fullscreen）位置修正，对应 RA3Bar-RA3Launcher main.cpp 的
-/// findRA3Window + SetWindowPos 逻辑：窗口化启动后等待游戏窗口出现，按 -xres/-yres 在桌面上居中，
+/// findRA3Window + SetWindowPos 逻辑：窗口化启动后等游戏窗口出现，进程存活 + 输入空闲 + 窗口即时响应
+/// 三重条件都满足视为游戏初始化完毕，把窗口按<strong>实际尺寸</strong>居中于其所在显示器，
 /// -x/-y 显式指定位置，-allowAlwaysOnTop 时保留原 z-order。
+/// 与 RA3Bar 的三处有意差异：居中不用 -xres/-yres（那是游戏物理像素语义，与 DPI 虚拟化坐标系混用会算出屏幕外位置，
+/// 如 4K@150% 下 -xres 3840 配 2560 宽虚拟桌面得 -640）、居中基准用窗口所在显示器而非整块桌面（多显示器负原点）、
+/// 另加有界稳定观察应对初始化后段的窗口改尺寸。调整期间线程 DPI 上下文钉在 unaware（与游戏一致）。
 /// </summary>
 public static class Ra3GameWindow
 {
@@ -58,10 +63,15 @@ public static class Ra3GameWindow
         return false;
     }
 
-    /// <summary>按调整项移动游戏窗口：无边框全屏时按分辨率居中于桌面，-x/-y 显式覆盖；默认取消置顶。</summary>
+    /// <summary>按调整项移动游戏窗口：无边框全屏时把窗口按实际尺寸居中于所在显示器，-x/-y 显式覆盖；默认取消置顶。</summary>
     /// <param name="windowHandle">游戏窗口句柄。</param>
     /// <param name="adjustment">窗口调整项（见 <see cref="ParseFromArguments"/>）。</param>
-    public static void AdjustPosition(IntPtr windowHandle, Ra3WindowAdjustment adjustment)
+    /// <param name="stabilizationMilliseconds">居中后的稳定观察时长（毫秒，默认 3 秒）：游戏初始化后段可能还会改窗口
+    /// 尺寸（默认分辨率 → 用户设置分辨率），尺寸一变即按新尺寸重新居中，连续稳定若干轮或超时即止；≤ 0 只调整一次。
+    /// 仅无边框全屏（<see cref="Ra3WindowAdjustment.Fullscreen"/>）生效。</param>
+    /// <remarks>整个调整过程把线程 DPI 上下文切到 unaware（与游戏同一坐标系，见
+    /// <see cref="WindowInterop.EnterDpiUnawareScope"/>），并在 finally 中恢复。</remarks>
+    public static void AdjustPosition(IntPtr windowHandle, Ra3WindowAdjustment adjustment, int stabilizationMilliseconds = DefaultStabilizationMilliseconds)
     {
         ArgumentNullException.ThrowIfNull(adjustment);
         if (windowHandle == IntPtr.Zero)
@@ -69,10 +79,77 @@ public static class Ra3GameWindow
             throw new ArgumentException("窗口句柄不能为 0。", nameof(windowHandle));
         }
 
+        var previousContext = WindowInterop.EnterDpiUnawareScope();
+        try
+        {
+            var adjusted = AdjustOnce(windowHandle, adjustment);
+            if (adjustment.Fullscreen)
+            {
+                Stabilize(windowHandle, adjustment, adjusted.Width, adjusted.Height, stabilizationMilliseconds);
+            }
+        }
+        finally
+        {
+            WindowInterop.ExitDpiScope(previousContext);
+        }
+    }
+
+    /// <summary>执行一次「读当前矩形 → 按所在显示器计算位置 → 移动窗口」，返回移动结果（含参与居中的窗口尺寸）。</summary>
+    private static (int Left, int Top, int Width, int Height) AdjustOnce(IntPtr windowHandle, Ra3WindowAdjustment adjustment)
+    {
         var current = WindowInterop.GetWindowRect(windowHandle);
-        var desktop = WindowInterop.GetWindowRect(WindowInterop.GetDesktopWindowHandle());
-        var (left, top) = ComputePosition(current, desktop, adjustment);
+        var anchor = WindowInterop.GetMonitorRect(windowHandle);
+        var (left, top) = ComputePosition(current, anchor, adjustment);
         WindowInterop.SetWindowPosition(windowHandle, left, top, adjustment.AllowAlwaysOnTop);
+        return (left, top, current.Width, current.Height);
+    }
+
+    /// <summary>稳定观察：游戏初始化后段可能还会改窗口尺寸，尺寸一变即按新尺寸重新居中；连续稳定或超时即止。</summary>
+    private static void Stabilize(IntPtr windowHandle, Ra3WindowAdjustment adjustment, int lastWidth, int lastHeight, int stabilizationMilliseconds)
+    {
+        if (stabilizationMilliseconds <= 0)
+        {
+            return;
+        }
+
+        var deadline = Environment.TickCount64 + stabilizationMilliseconds;
+        var stableRounds = 0;
+        while (Environment.TickCount64 < deadline)
+        {
+            Thread.Sleep(Interval);
+
+            // 窗口已销毁（游戏退出/崩溃）→ 无需继续跟踪。
+            if (!WindowInterop.IsWindowValid(windowHandle))
+            {
+                return;
+            }
+
+            WindowInterop.Rect rect;
+            try
+            {
+                rect = WindowInterop.GetWindowRect(windowHandle);
+            }
+            catch (Win32Exception)
+            {
+                // 读矩形失败（窗口恰在销毁）→ 视同退出跟踪。
+                return;
+            }
+
+            if (rect.Width == lastWidth && rect.Height == lastHeight)
+            {
+                if (++stableRounds >= StableRounds)
+                {
+                    return;
+                }
+
+                continue;
+            }
+
+            var adjusted = AdjustOnce(windowHandle, adjustment);
+            lastWidth = adjusted.Width;
+            lastHeight = adjusted.Height;
+            stableRounds = 0;
+        }
     }
 
     /// <summary>
@@ -148,27 +225,21 @@ public static class Ra3GameWindow
             : null;
     }
 
-    /// <summary>计算调整后的窗口左上角位置（纯函数，与 RA3Bar 的 rect.left/rect.top 计算一致）。</summary>
-    /// <param name="current">窗口当前矩形。</param>
-    /// <param name="desktop">桌面矩形。</param>
-    /// <param name="adjustment">窗口调整项。</param>
-    internal static (int Left, int Top) ComputePosition(WindowInterop.Rect current, WindowInterop.Rect desktop, Ra3WindowAdjustment adjustment)
+    /// <summary>计算调整后的窗口左上角位置（纯函数）。</summary>
+    /// <param name="current">窗口当前矩形：无边框全屏时用其<strong>实际尺寸</strong>参与居中——三重等待通过后
+    /// 它就是用户设置的最终分辨率，且与显示器矩形同一坐标系；不使用 -xres/-yres 计算（见类型文档）。</param>
+    /// <param name="anchor">居中基准矩形（<see cref="AdjustPosition"/> 传入窗口所在显示器，含原点偏移）。</param>
+    /// <param name="adjustment">窗口调整项（-xres/-yres 仅转发给游戏进程，不参与居中）。</param>
+    internal static (int Left, int Top) ComputePosition(WindowInterop.Rect current, WindowInterop.Rect anchor, Ra3WindowAdjustment adjustment)
     {
         var left = current.Left;
         var top = current.Top;
 
-        // 无边框全屏：按 -xres/-yres 把窗口居中于桌面（整数除法，与 C++ 一致）。
+        // 无边框全屏：按窗口实际尺寸在所在显示器内居中（整数除法；尺寸==显示器时正好铺满，无缝隙）。
         if (adjustment.Fullscreen)
         {
-            if (adjustment.ResolutionWidth is { } width)
-            {
-                left = (desktop.Width - width) / 2;
-            }
-
-            if (adjustment.ResolutionHeight is { } height)
-            {
-                top = (desktop.Height - height) / 2;
-            }
+            left = anchor.Left + (anchor.Width - current.Width) / 2;
+            top = anchor.Top + (anchor.Height - current.Height) / 2;
         }
 
         // -x/-y 显式指定位置，覆盖居中结果。
@@ -199,12 +270,19 @@ public static class Ra3GameWindow
 
     /// <summary>轮询间隔（毫秒），与 RA3Bar 的 interval=499 一致。</summary>
     private const int Interval = 499;
+
+    /// <summary>稳定观察中连续多少轮尺寸不变视为已稳定。</summary>
+    private const int StableRounds = 3;
+
+    /// <summary>AdjustPosition 默认的稳定观察时长（毫秒）。</summary>
+    private const int DefaultStabilizationMilliseconds = 3000;
 }
 
 /// <summary>RA3 游戏窗口位置调整项（对应 RA3Bar 的 -fullscreen/-xres/-yres/-x/-y/-allowAlwaysOnTop）。</summary>
 /// <param name="Fullscreen">是否无边框全屏（-fullscreen，配合 <see cref="Ra3LaunchMode.Windowed"/> 使用）。</param>
-/// <param name="ResolutionWidth">请求的分辨率宽度（-xres），用于桌面居中。</param>
-/// <param name="ResolutionHeight">请求的分辨率高度（-yres），用于桌面居中。</param>
+/// <param name="ResolutionWidth">请求的分辨率宽度（-xres）。仅原样转发给游戏进程，<strong>不参与居中计算</strong>
+/// （居中用窗口实际尺寸，见 <see cref="Ra3GameWindow.ComputePosition"/>）。</param>
+/// <param name="ResolutionHeight">请求的分辨率高度（-yres）。仅原样转发给游戏进程，不参与居中计算。</param>
 /// <param name="X">窗口屏幕 X 坐标（-x），覆盖居中结果。</param>
 /// <param name="Y">窗口屏幕 Y 坐标（-y），覆盖居中结果。</param>
 /// <param name="AllowAlwaysOnTop">保留原 z-order（-allowAlwaysOnTop，不加 SWP_NOZORDER 时默认取消置顶）。</param>

@@ -36,9 +36,10 @@ public sealed class Ra3GameLauncher
             return null;
         }
 
-        // RA3Bar 无边框全屏修正：窗口化启动时等游戏窗口出现后按 -fullscreen/-xres/-yres 居中，-x/-y 显式定位。
+        // RA3Bar 窗口化修正：任何 -win 启动都等游戏窗口出现后调整（三重等待视为初始化完毕），
+        // 无边框全屏按 -fullscreen/-xres/-yres 在窗口所在显示器内居中，-x/-y 显式定位，未指定时至少取消置顶。
         var adjustment = Ra3GameWindow.ParseFromArguments(options.Arguments, windowed: options.LaunchMode == Ra3LaunchMode.Windowed);
-        if (adjustment is { } pending && (pending.Fullscreen || pending.X is not null || pending.Y is not null) &&
+        if (adjustment is { } pending &&
             Ra3GameWindow.TryFindWindow(process, out var windowHandle, timeoutMilliseconds: 0))
         {
             Ra3GameWindow.AdjustPosition(windowHandle, pending);
