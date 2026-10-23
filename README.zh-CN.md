@@ -26,6 +26,20 @@
 dotnet add package Ra3.Tools
 ```
 
+### 2.1.5 窗口定位修复
+
+`Ra3GameLauncher` 现在必须观察到**同一个有效游戏窗口在启动时无响应，再恢复响应**，才调整窗口化位置和置顶状态。首次响应、输入空闲、固定延迟或尺寸暂时不变，都不能代替真实启动阶段。窗口消失、销毁或替换时重置观察。`TryFindWindow` 保留默认 5 秒超时，进程退出或超时返回 false；超时参数 ≤ 0 仍为无限等待（启动器使用此模式）。未观察到启动无响应阶段时不移动窗口。等待为同步过程，调用方应在工作线程启动。通过 shell 非提权启动（`EnsureUnelevated`）仍拿不到进程句柄，因此不调整窗口。
+
+2.1.4 已有的 DPI-unaware、按实际窗口尺寸居中、`-x`/`-y` 显式定位和 `-allowAlwaysOnTop` 语义保持不变。就绪后的有界尺寸稳定观察只是额外保障，不再承担判断启动完成的职责。本次不添加显示器选择 API。
+
+实际对比源码：[mrbbbaixue/fix/window-position-dpi](https://github.com/mrbbbaixue/RA3Bar-RA3Launcher/blob/b1df27d787db733366ab6a530b91a7fdd64b3811/main.cpp) 已采用 DPI-unaware、实际尺寸和所在显示器居中；[lanyizi/master](https://github.com/lanyizi/RA3Bar-RA3Launcher/blob/8b0b9bd341649de27281f83d8cd3d506fb690a8b/main.cpp) 按桌面与 `-xres`/`-yres` 计算。两者都是输入空闲后首次成功响应 `WM_NULL` 就定位，并未显式观察启动无响应到恢复的转换。2.1.5 修复的是这一剩余时序缺口，不是重复 DPI 修复。
+
+`Ra3GameWindowTests` 覆盖过早/持续响应、无响应后的恢复、窗口替换/消失，以及按恢复后的尺寸居中。真实游戏验证还需要 Windows、带匹配 SkuDef/数据可执行文件的 RA3 安装和会出现无响应阶段的启动：使用 `LaunchMode.Windowed`、`Arguments: "-fullscreen -xres <宽> -yres <高>"`、`EnsureUnelevated: false`，观察是否只在恢复响应后定位，并在同一 DPI-unaware 上下文比较窗口和显示器矩形。另检查显式坐标、启动中退出和有限 `TryFindWindow` 超时，无需修改游戏或档案文件。
+
+本次验证：Windows 上 Release 测试 128 项通过；实际游戏以 `-win -fullscreen -xres 1280 -yres 720` 启动，恢复响应后进行定位，在 DPI-unaware 坐标系下窗口为 1024×576，最终左上角为 `(512, 288)`，与显示器边界算出的居中位置一致。未验证多显示器；本机单屏，显示器选择另记 [issue #21](https://github.com/mrbbbaixue/Ra3.Tools/issues/21)。
+
+发布工具依赖升级到 `Microsoft.SourceLink.GitHub` 10.0.402，避开其传递依赖 `Microsoft.Build.Tasks.Git` 的 [GHSA-23fw-v26w-5fgq](https://github.com/advisories/GHSA-23fw-v26w-5fgq) 安全公告，否则现有警告视为错误设置会阻止还原。发布继续沿用 `.github/workflows/publish.yml`：Windows/.NET 10 上还原、构建、测试和打包，再通过 `v*` 标签（或手动触发工作流）执行 NuGet 受信任发布。
+
 ## 示例
 
 ### 读取安装目录

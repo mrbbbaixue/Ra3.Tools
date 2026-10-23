@@ -26,6 +26,20 @@ Windows-only RA3 SDK for local installation management, launch helpers, SkuDef e
 dotnet add package Ra3.Tools
 ```
 
+### 2.1.5 window placement fix
+
+`Ra3GameLauncher` now waits for the **same valid game window to stop responding during startup and then recover** before applying windowed position/z-order adjustments. A first responsive window, input-idle notification, fixed sleep, or temporarily stable size is not startup completion. Missing, destroyed, or replacement windows reset the observation. `TryFindWindow` retains its default 5-second timeout and returns false on exit/timeout; a nonpositive timeout remains unlimited (as used by the launcher). If the startup unresponsive phase is never observed, it does not move the window. Call the launcher from a worker thread because this wait is synchronous. Shell-based `EnsureUnelevated` launches still return no process handle and do not adjust windows.
+
+The 2.1.4 DPI-unaware, actual-window-size centering remains unchanged, including explicit `-x`/`-y` and `-allowAlwaysOnTop`. The subsequent bounded size-stabilization pass is only a safeguard after readiness, not a substitute for it. No monitor-selection API is added.
+
+Compared upstream sources: [mrbbbaixue/fix/window-position-dpi](https://github.com/mrbbbaixue/RA3Bar-RA3Launcher/blob/b1df27d787db733366ab6a530b91a7fdd64b3811/main.cpp) already uses DPI-unaware, actual-size/monitor centering; [lanyizi/master](https://github.com/lanyizi/RA3Bar-RA3Launcher/blob/8b0b9bd341649de27281f83d8cd3d506fb690a8b/main.cpp) uses desktop dimensions and `-xres`/`-yres`. Both accept the first successful `WM_NULL` probe after input-idle; neither explicitly observes startup unresponsiveness and recovery. Version 2.1.5 addresses that remaining timing gap rather than duplicating the DPI fix.
+
+Regression coverage in `Ra3GameWindowTests` exercises early/repeated responsiveness, recovery, window replacement/disappearance, and centering with the recovered size. Real-game verification additionally requires Windows, an installed RA3 with its matching SkuDef/data executable, and a startup that exposes the unresponsive phase. Launch with `LaunchMode.Windowed`, `Arguments: "-fullscreen -xres <width> -yres <height>"`, and `EnsureUnelevated: false`; observe that placement happens only after recovery and compare window/monitor rectangles in the same DPI-unaware context. Also check explicit coordinates, process exit during startup, and a finite `TryFindWindow` timeout. These checks do not require editing game/profile files.
+
+Verified on Windows: all 128 Release tests passed. An actual game launched with `-win -fullscreen -xres 1280 -yres 720` was positioned after recovery; in the DPI-unaware coordinate space its 1024×576 window ended at `(512, 288)`, matching the center computed from the monitor bounds. Multi-monitor behavior was not verified on this single-monitor machine; monitor selection is tracked separately in [issue #21](https://github.com/mrbbbaixue/Ra3.Tools/issues/21).
+
+Release tooling uses `Microsoft.SourceLink.GitHub` 10.0.402 to avoid the transitive `Microsoft.Build.Tasks.Git` advisory [GHSA-23fw-v26w-5fgq](https://github.com/advisories/GHSA-23fw-v26w-5fgq), which otherwise blocks restore with warnings treated as errors. Publishing still follows `.github/workflows/publish.yml`: restore/build/test on Windows with .NET 10, pack, then NuGet trusted publishing from a `v*` tag (or a manual workflow dispatch).
+
 ## Examples
 
 ### Read install path

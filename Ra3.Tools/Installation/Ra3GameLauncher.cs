@@ -7,7 +7,7 @@ namespace Ra3.Tools.Installation;
 /// 以 RA3Bar-RA3Launcher 的方式启动游戏：解析版本对应的 SkuDef（如 RA3_chinese_t_1.12.SkuDef），
 /// 读取其 "set-exe" 指向的游戏本体可执行文件（如 Data\ra3_1.12.game；SkuDef 无 set-exe——如 MOD 的 SkuDef——时回退 RA3.exe），
 /// 组装 "&lt;游戏本体&gt; [参数] [-modConfig ...] [-replayGame ...] -config &lt;SkuDef&gt;" 命令行并以安装根目录为工作目录启动。
-/// 窗口化启动（-win）时自动执行无边框全屏位置修正（居中/定位，见 <see cref="Ra3GameWindow"/>，与 RA3Bar 一致）。
+/// 窗口化启动（-win）时自动等待启动无响应阶段结束，再执行窗口位置修正（居中/定位，见 <see cref="Ra3GameWindow"/>）。
 /// 不包含 RA3Bar 的 UI（控制中心、错误弹窗）；游戏退出码 123456789（无法更新）由调用方自行处理。
 /// </summary>
 public sealed class Ra3GameLauncher
@@ -36,8 +36,8 @@ public sealed class Ra3GameLauncher
             return null;
         }
 
-        // RA3Bar 窗口化修正：任何 -win 启动都等游戏窗口出现后调整（三重等待视为初始化完毕），
-        // 无边框全屏按 -fullscreen/-xres/-yres 在窗口所在显示器内居中，-x/-y 显式定位，未指定时至少取消置顶。
+        // 窗口化启动必须等同一窗口经历无响应并恢复后再调整，避免游戏初始化随后覆盖位置。
+        // 无边框全屏按实际窗口尺寸在所在显示器内居中；-x/-y 显式定位，未指定时至少取消置顶。
         var adjustment = Ra3GameWindow.ParseFromArguments(options.Arguments, windowed: options.LaunchMode == Ra3LaunchMode.Windowed);
         if (adjustment is { } pending &&
             Ra3GameWindow.TryFindWindow(process, out var windowHandle, timeoutMilliseconds: 0))

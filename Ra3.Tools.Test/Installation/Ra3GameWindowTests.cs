@@ -6,6 +6,96 @@ namespace Ra3.Tools.Test.Installation;
 public sealed class Ra3GameWindowTests
 {
     [Fact]
+    public void StartupReadiness_DoesNotAcceptFirstOrRepeatedResponsiveWindow()
+    {
+        var readiness = new Ra3GameWindow.StartupReadiness();
+        var handle = new IntPtr(1);
+
+        // Even more unchanged responsive samples than the position stabilization loop accepts
+        // cannot replace observing the actual startup unresponsive phase.
+        for (var sample = 0; sample < 10; sample++)
+        {
+            Assert.False(readiness.Observe(handle, responsive: true));
+        }
+    }
+
+    [Fact]
+    public void StartupReadiness_WaitsForRecoveryAfterStartupStopsResponding()
+    {
+        var readiness = new Ra3GameWindow.StartupReadiness();
+        var handle = new IntPtr(1);
+
+        Assert.False(readiness.Observe(handle, responsive: true));
+        Assert.False(readiness.Observe(handle, responsive: false));
+        Assert.False(readiness.Observe(handle, responsive: false));
+        Assert.True(readiness.Observe(handle, responsive: true));
+    }
+
+    [Fact]
+    public void StartupReadiness_CanFirstObserveWindowWhileUnresponsive()
+    {
+        var readiness = new Ra3GameWindow.StartupReadiness();
+        var handle = new IntPtr(1);
+
+        Assert.False(readiness.Observe(handle, responsive: false));
+        Assert.True(readiness.Observe(handle, responsive: true));
+        // A later input-idle check may not pass immediately; do not lose the observed phase.
+        Assert.True(readiness.Observe(handle, responsive: true));
+    }
+
+    [Fact]
+    public void StartupReadiness_DoesNotTransferUnresponsiveStateToReplacementWindow()
+    {
+        var readiness = new Ra3GameWindow.StartupReadiness();
+
+        Assert.False(readiness.Observe(new IntPtr(1), responsive: false));
+        Assert.False(readiness.Observe(new IntPtr(2), responsive: true));
+        Assert.False(readiness.Observe(new IntPtr(2), responsive: false));
+        Assert.True(readiness.Observe(new IntPtr(2), responsive: true));
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void StartupReadiness_MissingOrDestroyedWindowResetsObservation(bool responsive)
+    {
+        var readiness = new Ra3GameWindow.StartupReadiness();
+        var handle = new IntPtr(1);
+
+        Assert.False(readiness.Observe(handle, responsive: false));
+        Assert.False(readiness.Observe(IntPtr.Zero, responsive));
+        Assert.False(readiness.Observe(handle, responsive: true));
+    }
+
+    [Fact]
+    public void StartupReadiness_PositionUsesRecoveredWindowSizeNotEarlyStableSize()
+    {
+        var readiness = new Ra3GameWindow.StartupReadiness();
+        var handle = new IntPtr(1);
+        var monitor = new WindowInterop.Rect { Right = 2560, Bottom = 1440 };
+        var early = new WindowInterop.Rect { Left = 40, Top = 30, Right = 1320, Bottom = 750 };
+        var recovered = new WindowInterop.Rect { Left = 40, Top = 30, Right = 2600, Bottom = 1470 };
+        var adjustment = Ra3GameWindow.ParseFromArguments("-win -fullscreen -xres 3840 -yres 2160")!;
+        (int Left, int Top)? position = null;
+
+        // RA3 may keep an early size long enough to fool size-only stabilization.
+        for (var sample = 0; sample < 10; sample++)
+        {
+            if (readiness.Observe(handle, responsive: true))
+            {
+                position = Ra3GameWindow.ComputePosition(early, monitor, adjustment);
+            }
+        }
+
+        Assert.Null(position);
+        Assert.False(readiness.Observe(handle, responsive: false));
+        Assert.True(readiness.Observe(handle, responsive: true));
+        position = Ra3GameWindow.ComputePosition(recovered, monitor, adjustment);
+
+        Assert.Equal((0, 0), position.Value);
+    }
+
+    [Fact]
     public void ParseFromArguments_ReadsBorderlessFullscreenOptions()
     {
         var adjustment = Ra3GameWindow.ParseFromArguments("-win -fullscreen -xres 1920 -yres 1080");
@@ -152,7 +242,7 @@ public sealed class Ra3GameWindowTests
     [Fact]
     public void ComputePosition_FullscreenCentersByActualWindowSizeWithoutResolution()
     {
-        // 未指定 -xres/-yres 时也按窗口实际尺寸居中（三重等待通过后实际尺寸就是用户设置的最终分辨率）。
+        // 未指定 -xres/-yres 时也按窗口实际尺寸居中，不依赖命令行分辨率。
         var current = new WindowInterop.Rect { Left = 42, Top = 24, Right = 1962, Bottom = 1104 };
         var monitor = new WindowInterop.Rect { Left = 0, Top = 0, Right = 2560, Bottom = 1440 };
         var adjustment = new Ra3WindowAdjustment(Fullscreen: true, null, null, null, null, AllowAlwaysOnTop: false);

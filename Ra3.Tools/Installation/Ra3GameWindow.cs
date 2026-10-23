@@ -5,13 +5,12 @@ using Ra3.Tools.Interop.Windows;
 namespace Ra3.Tools.Installation;
 
 /// <summary>
-/// RA3 游戏窗口查找与无边框全屏（-win -fullscreen）位置修正，对应 RA3Bar-RA3Launcher main.cpp 的
-/// findRA3Window + SetWindowPos 逻辑：窗口化启动后等游戏窗口出现，进程存活 + 输入空闲 + 窗口即时响应
-/// 三重条件都满足视为游戏初始化完毕，把窗口按<strong>实际尺寸</strong>居中于其所在显示器，
+/// RA3 游戏窗口查找与无边框全屏（-win -fullscreen）位置修正。
+/// 先观察同一游戏窗口启动时不响应 WM_NULL，再等待其恢复响应且进程输入空闲，才按实际尺寸居中于所在显示器。
 /// -x/-y 显式指定位置，-allowAlwaysOnTop 时保留原 z-order。
-/// 与 RA3Bar 的三处有意差异：居中不用 -xres/-yres（那是游戏物理像素语义，与 DPI 虚拟化坐标系混用会算出屏幕外位置，
-/// 如 4K@150% 下 -xres 3840 配 2560 宽虚拟桌面得 -640）、居中基准用窗口所在显示器而非整块桌面（多显示器负原点）、
-/// 另加有界稳定观察应对初始化后段的窗口改尺寸。调整期间线程 DPI 上下文钉在 unaware（与游戏一致）。
+/// 与 RA3Bar 的差异：不把首次响应误判为初始化完成；居中不用 -xres/-yres（游戏物理像素与 DPI 虚拟化坐标不可混用），
+/// 基准用窗口所在显示器而非整块桌面；另保留有界稳定观察应对初始化后段的窗口改尺寸。
+/// 调整期间线程 DPI 上下文钉在 unaware（与游戏一致）。
 /// </summary>
 public static class Ra3GameWindow
 {
@@ -19,8 +18,9 @@ public static class Ra3GameWindow
     public const string Ra3WindowClassName = "41DAF790-16F5-4881-8754-59FD8CF3B8D2";
 
     /// <summary>
-    /// 等待并查找 RA3 游戏主窗口（与 RA3Bar 一致：进程存活 + 输入空闲 + 可见无属主 + 类名匹配 + 窗口可响应）。
-    /// RA3Bar 会一直轮询直到游戏退出；本库默认 5 秒超时（<paramref name="timeoutMilliseconds"/> ≤ 0 时与 RA3Bar 一致不设超时）。
+    /// 等待并查找完成启动无响应阶段的 RA3 游戏主窗口（进程存活、可见无属主、类名匹配）。
+    /// 必须观察同一有效窗口不响应 WM_NULL 后恢复响应，且进程输入空闲；首次响应或尺寸暂时稳定不足以证明启动完成。
+    /// 默认 5 秒超时（<paramref name="timeoutMilliseconds"/> ≤ 0 时不设超时）；进程退出时停止等待。
     /// </summary>
     /// <param name="process">已启动的游戏进程。</param>
     /// <param name="windowHandle">找到的游戏窗口句柄；超时或进程退出为 <see cref="IntPtr.Zero"/>。</param>
@@ -31,6 +31,7 @@ public static class Ra3GameWindow
         windowHandle = IntPtr.Zero;
 
         var deadline = timeoutMilliseconds <= 0 ? long.MaxValue : Environment.TickCount64 + timeoutMilliseconds;
+        var readiness = new StartupReadiness();
         while (Environment.TickCount64 < deadline)
         {
             // 进程已退出 → 窗口不会再出现。
@@ -39,19 +40,22 @@ public static class Ra3GameWindow
                 return false;
             }
 
-            // 游戏尚未进入输入空闲（窗口消息循环未就绪）。
-            if (!process.WaitForInputIdle(1))
-            {
-                continue;
-            }
-
+            // 不在采样前等待输入空闲：初始化阻塞本身就是必须观察到的阶段。
             if (!WindowInterop.TryFindRa3Window(process.Id, out var handle))
             {
+                readiness.Observe(IntPtr.Zero, responsive: false);
                 continue;
             }
 
-            // 窗口所属线程可能刚退出（SendMessageTimeout 带 SMTO_ERRORONEXIT 时返回 0）。
-            if (!WindowInterop.IsWindowAlive(handle, Interval))
+            var responsive = WindowInterop.IsWindowAlive(handle, Interval);
+            // WM_NULL 失败也可能是窗口销毁；无效句柄不能算作启动无响应。
+            if (!WindowInterop.IsWindowValid(handle))
+            {
+                readiness.Observe(IntPtr.Zero, responsive: false);
+                continue;
+            }
+
+            if (!readiness.Observe(handle, responsive) || !process.WaitForInputIdle(1) || process.WaitForExit(0))
             {
                 continue;
             }
@@ -61,6 +65,35 @@ public static class Ra3GameWindow
         }
 
         return false;
+    }
+
+    /// <summary>同一窗口必须先无响应再恢复；窗口消失或替换后重新观察，不复用旧窗口的启动阶段。</summary>
+    internal struct StartupReadiness
+    {
+        private IntPtr windowHandle;
+        private bool observedUnresponsive;
+
+        internal bool Observe(IntPtr handle, bool responsive)
+        {
+            if (handle != windowHandle || handle == IntPtr.Zero)
+            {
+                windowHandle = handle;
+                observedUnresponsive = false;
+            }
+
+            if (handle == IntPtr.Zero)
+            {
+                return false;
+            }
+
+            if (!responsive)
+            {
+                observedUnresponsive = true;
+                return false;
+            }
+
+            return observedUnresponsive;
+        }
     }
 
     /// <summary>按调整项移动游戏窗口：无边框全屏时把窗口按实际尺寸居中于所在显示器，-x/-y 显式覆盖；默认取消置顶。</summary>
@@ -226,8 +259,8 @@ public static class Ra3GameWindow
     }
 
     /// <summary>计算调整后的窗口左上角位置（纯函数）。</summary>
-    /// <param name="current">窗口当前矩形：无边框全屏时用其<strong>实际尺寸</strong>参与居中——三重等待通过后
-    /// 它就是用户设置的最终分辨率，且与显示器矩形同一坐标系；不使用 -xres/-yres 计算（见类型文档）。</param>
+    /// <param name="current">窗口当前矩形：无边框全屏时用其<strong>实际尺寸</strong>参与居中，
+    /// 与显示器矩形处于同一坐标系；不使用 -xres/-yres 计算（见类型文档）。</param>
     /// <param name="anchor">居中基准矩形（<see cref="AdjustPosition"/> 传入窗口所在显示器，含原点偏移）。</param>
     /// <param name="adjustment">窗口调整项（-xres/-yres 仅转发给游戏进程，不参与居中）。</param>
     internal static (int Left, int Top) ComputePosition(WindowInterop.Rect current, WindowInterop.Rect anchor, Ra3WindowAdjustment adjustment)
